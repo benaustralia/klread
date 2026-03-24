@@ -71,8 +71,8 @@ export default function App() {
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold shrink-0 flex items-center gap-2">
-            <BrokenCrown className="w-7 h-7" />
-            King Lear <span className="text-main">Promptbook</span>
+            <BrokenCrown className="w-14 h-14" />
+            King Lear <span style={{ color: '#2b96e8' }}>Promptbook</span>
           </h1>
           {session && (
             <span className="flex items-center gap-3 text-xs font-semibold">
