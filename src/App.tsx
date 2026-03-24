@@ -106,7 +106,7 @@ export default function App() {
                 </CardContent>
                 <CardFooter>
                   <Button className="w-full italic" onClick={join} disabled={loading}>
-                    {loading ? 'Joining…' : name.trim() ? `Enter ${name.trim().split(' ')[0].toUpperCase()}.` : 'Enter...'}
+                    {loading ? 'Joining…' : name.trim() ? `Enter ${name.trim().split(' ')[0].toUpperCase()}, at side.` : 'Enter...'}
                   </Button>
                 </CardFooter>
               </Card>
