@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Switch } from '@/components/ui/switch'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -100,9 +100,12 @@ export default function App() {
                   <CardTitle>Mark it, nuncle.</CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-6">
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-2">
                     <Input id="login-name" placeholder="your first name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
                     <Input id="login-code" placeholder="class code" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} />
+                    <Button className="italic shrink-0" onClick={join} disabled={loading}>
+                      {loading ? 'Joining…' : name.trim() ? `Enter ${name.trim().split(' ')[0].toUpperCase()}, at side.` : 'Enter...'}
+                    </Button>
                   </div>
                   {isNew && (
                     <div className="grid gap-3">
@@ -112,11 +115,6 @@ export default function App() {
                   )}
                   {err && <p className="text-destructive text-sm">{err}</p>}
                 </CardContent>
-                <CardFooter>
-                  <Button className="w-full italic" onClick={join} disabled={loading}>
-                    {loading ? 'Joining…' : name.trim() ? `Enter ${name.trim().split(' ')[0].toUpperCase()}, at side.` : 'Enter...'}
-                  </Button>
-                </CardFooter>
               </Card>
             </div>
           )}
