@@ -35,7 +35,12 @@ export function TeacherView({ teacherKey }: { teacherKey?: string }) {
     setClasses(p => p.filter(c => c.joinCode !== code))
   }
 
-  if (err) return <div className="flex items-center justify-center min-h-screen"><p className="text-destructive font-semibold">{err}</p></div>
+  if (err) return (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+      <p className="text-destructive font-semibold">{err}</p>
+      <button onClick={() => { localStorage.removeItem('klread_session'); location.href = '/' }} className="text-sm underline text-muted-foreground">Log out and try again</button>
+    </div>
+  )
   if (!notes) return <div className="flex items-center justify-center min-h-screen"><p className="text-muted-foreground">Loading…</p></div>
 
   // Group notes by class, then student

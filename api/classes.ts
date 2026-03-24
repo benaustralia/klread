@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { neon } from '@neondatabase/serverless'
 
 const sql = neon(process.env.DATABASE_URL!)
-const auth = (req: VercelRequest) => req.query.key === process.env.TEACHER_KEY
+const auth = (req: VercelRequest) => req.query.key === process.env.TEACHER_KEY?.trim()
 
 function genCode() {
   return Array.from({ length: 7 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('')

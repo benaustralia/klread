@@ -6,7 +6,7 @@ const sql = neon(process.env.DATABASE_URL!)
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).end()
   const { key } = req.query
-  if (key !== process.env.TEACHER_KEY) return res.status(403).json({ error: 'forbidden' })
+  if (key !== process.env.TEACHER_KEY?.trim()) return res.status(403).json({ error: 'forbidden' })
   const rows = await sql`
     SELECT n.id, s.student_name AS "studentName", s.join_code AS "joinCode",
            c.label AS "classLabel", n.line_id AS "lineId", n.act, n.scene,
