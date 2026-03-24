@@ -38,8 +38,6 @@ export default function App() {
 
   const dialogOpen = !session && !isTeacher
 
-  function autoInitials(n: string) { return n.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 4) }
-
   async function join() {
     if (!name.trim() || !code.trim()) return setErr('Enter your name and join code')
     setLoading(true); setErr('')
@@ -47,10 +45,10 @@ export default function App() {
       const check = await fetch(`/api/sessions?code=${encodeURIComponent(code.trim())}&name=${encodeURIComponent(name.trim())}`)
       let data: any
       if (check.ok) {
-        data = await check.json() // returning user — use stored initials
+        data = await check.json()
       } else {
-        const derived = initials.trim().slice(0, 4).toUpperCase() || autoInitials(name.trim())
-        const res = await fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentName: name.trim(), joinCode: code.trim(), initials: derived }) })
+        if (!initials.trim()) { setErr('First time joining? Please add your initials.'); return }
+        const res = await fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentName: name.trim(), joinCode: code.trim(), initials: initials.trim().slice(0, 4).toUpperCase() }) })
         if (!res.ok) { setErr('Could not join. Check your join code.'); return }
         data = await res.json()
       }
