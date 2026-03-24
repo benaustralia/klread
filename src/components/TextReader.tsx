@@ -42,7 +42,7 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
 
   return (
     <>
-      <Menubar className="mb-6">
+      <Menubar className="mb-6 w-fit">
         {acts.map(act => (
           <MenubarMenu key={act.num}>
             <MenubarTrigger className={actNum === act.num ? 'font-bold' : ''}>
@@ -65,12 +65,15 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
 
       <div className="max-w-2xl mx-auto py-4">
         {currentScene?.lines.reduce<{ el: React.ReactElement[]; last: string | undefined }>((acc, line) => {
-          const showSpk = line.speaker && line.speaker !== acc.last
-          acc.last = line.speaker
+          const isStage = line.type === 'stage'
+          const showSpk = !isStage && line.speaker && line.speaker !== acc.last
+          if (!isStage) acc.last = line.speaker
           acc.el.push(
             <div key={line.id}>
               {showSpk && <p className="speaker-label">{line.speaker}</p>}
-              <LineRenderer line={line} showVariants={showVariants} initials={annotated.has(line.id) ? initials : undefined} onClick={l => { setSelected(l); setOpen(true) }} />
+              {isStage
+                ? <p className="text-sm italic text-muted-foreground px-2 py-0.5 my-1">{line.text}</p>
+                : <LineRenderer line={line} showVariants={showVariants} initials={annotated.has(line.id) ? initials : undefined} onClick={l => { setSelected(l); setOpen(true) }} />}
             </div>
           )
           return acc

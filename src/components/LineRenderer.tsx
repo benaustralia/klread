@@ -1,7 +1,7 @@
 import { TextALeft, TextARight, TextBLeft, TextBRight } from './brackets'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-export type Line = { id: string; ftln: number; act: number; scene: number; speaker?: string; text: string; ana: 'verse' | 'prose' | 'short'; texta?: true; textb?: true }
+export type Line = { id: string; ftln?: number; act: number; scene: number; speaker?: string; text: string; ana?: 'verse' | 'prose' | 'short'; texta?: true; textb?: true; type?: 'stage'; stageType?: string; inline?: boolean }
 
 function BracketTip({ children, label }: { children: React.ReactNode; label: string }) {
   return (
