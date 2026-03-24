@@ -92,8 +92,8 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
       <section className="mb-8">
         <h2 className="text-lg font-semibold mb-3">Class codes</h2>
         <div className="flex gap-2 mb-4 flex-wrap">
-          <Input placeholder="Label (e.g. Year 11B)" value={label} onChange={e => setLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && createCode()} className="max-w-xs" />
-          <Input placeholder="Code (e.g. ENG11B) — optional" value={codeInput} onChange={e => setCodeInput(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && createCode()} className="max-w-xs uppercase" />
+          <Input placeholder="Label e.g. Year 11B" value={label} onChange={e => setLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && createCode()} className="max-w-xs" />
+          <Input placeholder="Code e.g. ENG11B" value={codeInput} onChange={e => setCodeInput(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && createCode()} className="max-w-xs uppercase" />
           <Button onClick={createCode} disabled={creating || !label.trim()}>{creating ? 'Creating…' : 'Create'}</Button>
         </div>
         {!classes.length && <p className="text-sm text-muted-foreground">No class codes yet.</p>}
