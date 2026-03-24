@@ -6,6 +6,19 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* Neobrutalism theme */
+  --border-radius: 5px;
+  --box-shadow-x: 4px;
+  --box-shadow-y: 4px;
+  --reverse-box-shadow-x: -4px;
+  --reverse-box-shadow-y: -4px;
+  --heading-font-weight: 700;
+  --base-font-weight: 500;
+  --main: oklch(67.47% 0.1725 259.61);
+  --main-foreground: oklch(0% 0 0);
+  --secondary-background: oklch(100% 0 0);
+  --shadow: var(--box-shadow-x) var(--box-shadow-y) 0px 0px var(--border);
+
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
@@ -203,6 +216,20 @@ code {
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+
+  /* Neobrutalism Tailwind mappings */
+  --color-main: var(--main);
+  --color-main-foreground: var(--main-foreground);
+  --color-secondary-background: var(--secondary-background);
+  --spacing-boxShadowX: var(--box-shadow-x);
+  --spacing-boxShadowY: var(--box-shadow-y);
+  --spacing-reverseBoxShadowX: var(--reverse-box-shadow-x);
+  --spacing-reverseBoxShadowY: var(--reverse-box-shadow-y);
+  --radius-base: var(--border-radius);
+  --shadow-shadow: var(--shadow);
+  --font-weight-base: var(--base-font-weight);
+  --font-weight-heading: var(--heading-font-weight);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
