@@ -29,12 +29,12 @@ export default function App() {
       let studentId: string; let sessionInitials: string
       if (check.ok) {
         const data = await check.json()
-        studentId = data.studentId; sessionInitials = data.initials || initials.trim()
+        studentId = data.studentId; sessionInitials = data.initials ?? ''
       } else {
         const res = await fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentName: name.trim(), joinCode: code.trim() }) })
         if (!res.ok) { setErr('Could not join. Check your join code.'); return }
         const data = await res.json()
-        studentId = data.studentId; sessionInitials = data.initials || initials.trim()
+        studentId = data.studentId; sessionInitials = data.initials ?? ''
       }
       const s: Session = { studentId, studentName: name.trim(), joinCode: code.trim(), initials: sessionInitials }
       localStorage.setItem(KEY, JSON.stringify(s)); setSession(s)
@@ -69,10 +69,12 @@ export default function App() {
             </span>
           )}
           <div className="flex items-center gap-3 shrink-0">
-            <label className="flex items-center gap-2 text-sm font-sans cursor-pointer">
-              <span className="text-muted-foreground">Highlight</span>
-              <Switch checked={showVariants} onCheckedChange={setShowVariants} />
-            </label>
+            {session && (
+              <label className="flex items-center gap-2 text-sm font-sans cursor-pointer">
+                <span className="text-muted-foreground">Highlight</span>
+                <Switch checked={showVariants} onCheckedChange={setShowVariants} />
+              </label>
+            )}
             {session && (
               <Button onClick={() => { localStorage.removeItem(KEY); setSession(null) }} variant="neutral" size="sm" className="font-sans text-xs">
                 Log out
