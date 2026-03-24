@@ -21,7 +21,17 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(stored)
   const [showVariants, setShowVariants] = useState(false)
   const [name, setName] = useState(''); const [code, setCode] = useState(''); const [initials, setInitials] = useState('')
+  const [isReturning, setIsReturning] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(false); const [err, setErr] = useState('')
+
+  useEffect(() => {
+    if (!name.trim() || !code.trim()) return setIsReturning(null)
+    const t = setTimeout(() => {
+      fetch(`/api/sessions?code=${encodeURIComponent(code.trim())}&name=${encodeURIComponent(name.trim())}`)
+        .then(r => setIsReturning(r.ok)).catch(() => setIsReturning(null))
+    }, 400)
+    return () => clearTimeout(t)
+  }, [name, code])
 
   // Refresh session on mount to pick up server-side changes (e.g. isTeacher flag)
   useEffect(() => {
@@ -69,8 +79,8 @@ export default function App() {
           </DialogHeader>
           <div className="flex flex-col gap-3 mt-2">
             <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
-            <Input placeholder="Initials (e.g. BH)" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} />
             <Input placeholder="Join code (e.g. WFVCE26)" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" />
+            {isReturning === false && <Input placeholder="Initials (e.g. BH)" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} />}
             {err && <p className="text-destructive text-sm">{err}</p>}
             <Button onClick={join} disabled={loading}>{loading ? 'Joining…' : 'Join'}</Button>
           </div>
