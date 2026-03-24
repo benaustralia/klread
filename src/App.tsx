@@ -13,6 +13,10 @@ const KEY = 'klread_session'
 const stored = (): Session | null => { try { return JSON.parse(localStorage.getItem(KEY) ?? 'null') } catch { return null } }
 
 export default function App() {
+  // ?logout in URL always clears session — escape hatch if ever stuck
+  if (new URLSearchParams(location.search).has('logout')) {
+    localStorage.removeItem(KEY); location.replace('/')
+  }
   const isTeacher = location.pathname === '/teacher'
   const [session, setSession] = useState<Session | null>(stored)
   const [showVariants, setShowVariants] = useState(false)
