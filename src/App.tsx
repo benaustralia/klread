@@ -107,7 +107,7 @@ export default function App() {
                   <div className="flex flex-row items-center gap-2">
                     <Input id="login-name" placeholder="your first name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
                     <Input id="login-code" placeholder="class code" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} />
-                    <Button className="italic shrink-0" onClick={join} disabled={loading}>
+                    <Button className="italic shrink-0" style={{ color: '#ffcc58' }} onClick={join} disabled={loading}>
                       {loading ? 'Joining…' : name.trim() ? `Enter ${name.trim().split(' ')[0].toUpperCase()}, at side.` : 'Enter...'}
                     </Button>
                   </div>
