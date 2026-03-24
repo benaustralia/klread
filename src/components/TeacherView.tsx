@@ -36,7 +36,14 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   const [classes, setClasses] = useState<Class[]>([])
   const [allStudents, setAllStudents] = useState<Student[]>([])
   const [allNotes, setAllNotes] = useState<(Note & { joinCode: string })[]>([])
-  const [reading, setReading] = useState<{ joinCode: string; label: string } | null>(null)
+  const readingParam = new URLSearchParams(location.search).get('reading')
+  const [reading, setReadingState] = useState<{ joinCode: string; label: string } | null>(null)
+  function setReading(val: { joinCode: string; label: string } | null) {
+    setReadingState(val)
+    const url = new URL(location.href)
+    if (val) { url.searchParams.set('reading', val.joinCode) } else { url.searchParams.delete('reading') }
+    history.replaceState(null, '', url)
+  }
   const [showVariants, setShowVariants] = useState(true)
   const [label, setLabel] = useState(''); const [codeInput, setCodeInput] = useState(''); const [creating, setCreating] = useState(false)
   const [newStudent, setNewStudent] = useState<Record<string, { name: string; initials: string }>>({})
@@ -49,7 +56,14 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
       .then((rows: (Student & { joinCode: string })[]) => setAllStudents(rows))
       .catch(e => setErr(e.message))
     fetch(`/api/teacher?key=${k}`).then(r => r.json()).then(setAllNotes).catch(() => {})
-    fetch(`/api/classes?key=${k}`).then(r => r.json()).then((all: Class[]) => setClasses(all.filter(c => c.label !== 'Teacher'))).catch(() => {})
+    fetch(`/api/classes?key=${k}`).then(r => r.json()).then((all: Class[]) => {
+      const filtered = all.filter(c => c.label !== 'Teacher')
+      setClasses(filtered)
+      if (readingParam) {
+        const match = filtered.find(c => c.joinCode === readingParam)
+        if (match) setReadingState({ joinCode: match.joinCode, label: match.label })
+      }
+    }).catch(() => {})
   }, [])
 
   async function createCode() {
