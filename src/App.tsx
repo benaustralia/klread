@@ -69,7 +69,7 @@ export default function App() {
           </DialogHeader>
           <div className="flex flex-col gap-3 mt-2">
             <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
-            <Input placeholder="Initials — optional for returning students" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} />
+            <Input placeholder="Initials (e.g. BH)" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} />
             <Input placeholder="Join code (e.g. WFVCE26)" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" />
             {err && <p className="text-destructive text-sm">{err}</p>}
             <Button onClick={join} disabled={loading}>{loading ? 'Joining…' : 'Join'}</Button>
