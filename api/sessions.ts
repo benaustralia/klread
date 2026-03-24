@@ -18,7 +18,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!studentName || !joinCode) return res.status(400).json({ error: 'studentName and joinCode required' })
     const cls = await sql`SELECT is_teacher FROM classes WHERE join_code = ${joinCode}`
     if (!cls.length) return res.status(400).json({ error: 'Invalid join code' })
-    const rows = await sql`INSERT INTO sessions (student_name, join_code, initials) VALUES (${studentName}, ${joinCode}, ${initials ?? ''}) ON CONFLICT (student_name, join_code) DO UPDATE SET initials = EXCLUDED.initials RETURNING student_id AS "studentId", initials`
+    // If no initials provided, reuse from any existing session for this name
+    let resolvedInitials = initials?.trim() ?? ''
+    if (!resolvedInitials) {
+      const existing = await sql`SELECT initials FROM sessions WHERE student_name = ${studentName} AND initials != '' LIMIT 1`
+      resolvedInitials = existing[0]?.initials ?? ''
+    }
+    if (!resolvedInitials) return res.status(422).json({ error: 'initials required', needsInitials: true })
+    const rows = await sql`INSERT INTO sessions (student_name, join_code, initials) VALUES (${studentName}, ${joinCode}, ${resolvedInitials}) ON CONFLICT (student_name, join_code) DO UPDATE SET initials = EXCLUDED.initials RETURNING student_id AS "studentId", initials`
     return res.json({ ...rows[0], isTeacher: cls[0].is_teacher ?? false })
   }
   res.status(405).end()

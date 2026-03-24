@@ -48,8 +48,8 @@ export default function App() {
       if (check.ok) {
         data = await check.json()
       } else {
-        if (!initials.trim()) { setIsNew(true); setErr('First time joining — please add your initials below.'); return }
         const res = await fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentName: name.trim(), joinCode: code.trim(), initials: initials.trim().slice(0, 4).toUpperCase() }) })
+        if (res.status === 422) { setIsNew(true); setErr('Please add your initials — this is only needed once.'); return }
         if (!res.ok) { setErr('Could not join. Check your join code.'); return }
         data = await res.json()
       }
@@ -71,8 +71,8 @@ export default function App() {
           <div className="flex flex-col gap-3 mt-2">
             <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
             <Input placeholder="Join code (e.g. WFVCE26)" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" />
-            {isNew && <Input placeholder="Initials (e.g. BH)" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} autoFocus />}
             {err && <p className="text-destructive text-sm">{err}</p>}
+            {isNew && <Input placeholder="Initials (e.g. BH)" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} autoFocus />}
             <Button onClick={join} disabled={loading}>{loading ? 'Joining…' : 'Join'}</Button>
           </div>
         </DialogContent>
