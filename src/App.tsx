@@ -16,13 +16,13 @@ export default function App() {
   const isTeacher = location.pathname === '/teacher'
   const [session, setSession] = useState<Session | null>(stored)
   const [showVariants, setShowVariants] = useState(false)
-  const [name, setName] = useState(''); const [initials, setInitials] = useState(''); const [code, setCode] = useState('')
+  const [name, setName] = useState(''); const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false); const [err, setErr] = useState('')
 
   const dialogOpen = !session && !isTeacher
 
   async function join() {
-    if (!name.trim() || !code.trim() || !initials.trim()) return setErr('Enter your name, initials and join code')
+    if (!name.trim() || !code.trim()) return setErr('Enter your name and join code')
     setLoading(true); setErr('')
     try {
       const check = await fetch(`/api/sessions?code=${encodeURIComponent(code.trim())}`)
@@ -31,7 +31,7 @@ export default function App() {
         const data = await check.json()
         studentId = data.studentId; sessionInitials = data.initials || initials.trim()
       } else {
-        const res = await fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentName: name.trim(), joinCode: code.trim(), initials: initials.trim() }) })
+        const res = await fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentName: name.trim(), joinCode: code.trim() }) })
         if (!res.ok) { setErr('Could not join. Check your join code.'); return }
         const data = await res.json()
         studentId = data.studentId; sessionInitials = data.initials || initials.trim()
@@ -49,11 +49,10 @@ export default function App() {
         <DialogContent className="font-serif sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-serif text-xl">King Lear</DialogTitle>
-            <DialogDescription className="font-sans text-sm">Enter your name, initials and the join code from your teacher.</DialogDescription>
+            <DialogDescription className="font-sans text-sm">Enter your name and the join code from your teacher.</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 mt-2">
             <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
-            <Input placeholder="Initials (e.g. B.H.)" value={initials} onChange={e => setInitials(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" />
             <Input placeholder="Join code (e.g. WFVCE26)" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" />
             {err && <p className="text-destructive text-sm">{err}</p>}
             <Button onClick={join} disabled={loading}>{loading ? 'Joining…' : 'Join'}</Button>
