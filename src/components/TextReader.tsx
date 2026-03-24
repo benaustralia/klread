@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LineRenderer, type Line } from './LineRenderer'
@@ -8,10 +8,22 @@ type Scene = { num: number; lines: Line[] }
 type Act = { num: number; scenes: Scene[] }
 const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V']
 
-export function TextReader({ acts, showVariants, studentId, studentName }: { acts: Act[]; showVariants: boolean; studentId: string; studentName: string }) {
+export function TextReader({ acts, showVariants, studentId, studentName, initials }: { acts: Act[]; showVariants: boolean; studentId: string; studentName: string; initials: string }) {
   const [selected, setSelected] = useState<Line | null>(null)
   const [open, setOpen] = useState(false)
   const [sceneTab, setSceneTab] = useState<Record<number, string>>({})
+  const [annotated, setAnnotated] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    fetch(`/api/notes?studentId=${studentId}`)
+      .then(r => r.json())
+      .then((notes: { lineId: string }[]) => setAnnotated(new Set(notes.map(n => n.lineId))))
+      .catch(() => {})
+  }, [studentId])
+
+  function onNotesSaved(lineId: string) {
+    setAnnotated(prev => new Set([...prev, lineId]))
+  }
 
   return (
     <>
@@ -34,7 +46,7 @@ export function TextReader({ acts, showVariants, studentId, studentName }: { act
                       acc.el.push(
                         <div key={line.id}>
                           {showSpk && <p className="mt-4 mb-1 text-xs font-sans uppercase tracking-widest font-bold border-b pb-1">{line.speaker}</p>}
-                          <LineRenderer line={line} showVariants={showVariants} onClick={l => { setSelected(l); setOpen(true) }} />
+                          <LineRenderer line={line} showVariants={showVariants} initials={annotated.has(line.id) ? initials : undefined} onClick={l => { setSelected(l); setOpen(true) }} />
                         </div>
                       )
                       return acc
@@ -46,7 +58,7 @@ export function TextReader({ acts, showVariants, studentId, studentName }: { act
           </TabsContent>
         ))}
       </Tabs>
-      <NotesSheet line={selected} open={open} onOpenChange={setOpen} studentId={studentId} studentName={studentName} />
+      <NotesSheet line={selected} open={open} onOpenChange={setOpen} studentId={studentId} studentName={studentName} onSaved={onNotesSaved} />
     </>
   )
 }

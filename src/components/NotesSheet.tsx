@@ -7,7 +7,7 @@ import type { Line } from './LineRenderer'
 
 type Note = { id: string; body: string; updatedAt: string }
 
-export function NotesSheet({ line, open, onOpenChange, studentId, studentName }: { line: Line | null; open: boolean; onOpenChange: (v: boolean) => void; studentId: string; studentName: string }) {
+export function NotesSheet({ line, open, onOpenChange, studentId, studentName, onSaved }: { line: Line | null; open: boolean; onOpenChange: (v: boolean) => void; studentId: string; studentName: string; onSaved?: (lineId: string) => void }) {
   const [body, setBody] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
   const [saving, setSaving] = useState(false)
@@ -25,6 +25,7 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName }:
     setBody('')
     const all = await fetch(`/api/notes?studentId=${studentId}`).then(r => r.json()).catch(() => [])
     setNotes(all.filter((n: any) => n.lineId === line.id))
+    onSaved?.(line.id)
     setSaving(false)
   }
 
