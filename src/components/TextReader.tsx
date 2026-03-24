@@ -4,7 +4,7 @@ import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger } fro
 import { LineRenderer, type Line } from './LineRenderer'
 import { NotesSheet } from './NotesSheet'
 
-type Scene = { num: number; lines: Line[] }
+type Scene = { num: number; lines: Line[]; location?: string; synopsis?: string }
 type Act = { num: number; scenes: Scene[] }
 const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V']
 
@@ -64,6 +64,13 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
       </Menubar>
 
       <div className="max-w-2xl mx-auto py-4">
+        {currentScene?.location && (
+          <div className="mb-6 border-b pb-4">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1">Act {ROMAN[actNum]} · Scene {sceneNum}</p>
+            <p className="font-semibold">{currentScene.location}</p>
+            {currentScene.synopsis && <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{currentScene.synopsis}</p>}
+          </div>
+        )}
         {currentScene?.lines.reduce<{ el: React.ReactElement[]; last: string | undefined }>((acc, line) => {
           const isStage = line.type === 'stage'
           const showSpk = !isStage && line.speaker && line.speaker !== acc.last

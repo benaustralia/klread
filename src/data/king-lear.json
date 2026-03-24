@@ -3417,7 +3417,9 @@
               "scene": 1,
               "text": "They exit ."
             }
-          ]
+          ],
+          "location": "King Lear's palace",
+          "synopsis": "Lear divides his kingdom among his daughters based on declarations of love; Cordelia refuses to flatter him and is disinherited, and Kent is banished for defending her. France takes Cordelia as his queen."
         },
         {
           "num": 2,
@@ -5260,7 +5262,9 @@
               "text": "All with me\u2019s meet that I can fashion fit.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "The Earl of Gloucester's castle",
+          "synopsis": "Edmund tricks his father Gloucester into believing his legitimate brother Edgar is plotting against him, and separately convinces Edgar he is in danger from their father."
         },
         {
           "num": 3,
@@ -5553,7 +5557,9 @@
               "ana": "verse",
               "texta": true
             }
-          ]
+          ],
+          "location": "The Duke of Albany's palace",
+          "synopsis": "Goneril, irritated by Lear's riotous knights, instructs her steward Oswald to treat Lear and his men with deliberate disrespect."
         },
         {
           "num": 4,
@@ -9314,7 +9320,9 @@
               "text": "Well, well, th\u2019 event.",
               "ana": "short"
             }
-          ]
+          ],
+          "location": "The Duke of Albany's palace",
+          "synopsis": "Kent returns in disguise and enters Lear's service; the Fool makes his first appearance and mocks Lear's folly. Goneril confronts Lear and demands he halve his retinue; Lear curses her and departs for Regan."
         },
         {
           "num": 5,
@@ -9841,7 +9849,9 @@
               "text": "shorter.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "Before the Duke of Albany's palace",
+          "synopsis": "Lear sends Kent ahead with a letter to Regan; the Fool continues to taunt Lear about his foolishness, and Lear begins to fear for his sanity."
         }
       ]
     },
@@ -11327,7 +11337,9 @@
               "text": "Your Graces are right welcome.",
               "ana": "short"
             }
-          ]
+          ],
+          "location": "The Earl of Gloucester's castle",
+          "synopsis": "Edmund stages a false confrontation with Edgar to convince Gloucester of Edgar's treachery; Edgar flees and is outlawed. Cornwall and Regan arrive and take Edmund into their service."
         },
         {
           "num": 2,
@@ -13147,7 +13159,9 @@
               "text": "wheel.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "Before the Earl of Gloucester's castle",
+          "synopsis": "Kent quarrels with and beats Oswald; Cornwall and Regan have Kent put in the stocks as an insult to Lear."
         },
         {
           "num": 3,
@@ -13359,7 +13373,9 @@
               "text": "That\u2019s something yet. Edgar I nothing am.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "The open country",
+          "synopsis": "Edgar, hunted as an outlaw, resolves to disguise himself as a mad beggar named Poor Tom."
         },
         {
           "num": 4,
@@ -19244,7 +19260,9 @@
               "text": "My Regan counsels well. Come out o\u2019 th\u2019 storm.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "Before the Earl of Gloucester's castle",
+          "synopsis": "Lear finds Kent in the stocks and is progressively humiliated as both Regan and Goneril refuse to house any of his knights. Stripped of his retinue, Lear rushes out into a gathering storm."
         }
       ]
     },
@@ -20023,7 +20041,9 @@
               "text": "Holla the other.",
               "ana": "short"
             }
-          ]
+          ],
+          "location": "The heath",
+          "synopsis": "A storm rages; Kent learns from a Gentleman that Lear is wandering the heath with only his Fool, and that there is a secret rift between Albany and Cornwall. Kent sends the Gentleman to Dover to alert Cordelia."
         },
         {
           "num": 2,
@@ -21020,7 +21040,9 @@
               "ana": "verse",
               "textb": true
             }
-          ]
+          ],
+          "location": "The heath",
+          "synopsis": "Lear rages against the storm, descending toward madness while the Fool tries to coax him to shelter; Kent finds them and leads them toward a hovel."
         },
         {
           "num": 3,
@@ -21277,7 +21299,9 @@
               "text": "The younger rises when the old doth fall.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "Gloucester's castle",
+          "synopsis": "Gloucester confides to Edmund that he has received a letter about a French invasion and intends to help Lear; Edmund immediately resolves to betray him to Cornwall."
         },
         {
           "num": 4,
@@ -23287,7 +23311,9 @@
               "text": "I smell the blood of a British man.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "The heath. Before a hovel",
+          "synopsis": "Lear and the Fool take shelter in a hovel and encounter Edgar disguised as Poor Tom; Lear, fascinated by the supposed mad beggar, begins to strip off his clothes. Gloucester arrives to guide them to safety."
         },
         {
           "num": 5,
@@ -23554,7 +23580,9 @@
               "ana": "prose",
               "texta": true
             }
-          ]
+          ],
+          "location": "Gloucester's castle",
+          "synopsis": "Edmund delivers Gloucester's treasonous letter to Cornwall, who resolves to arrest Gloucester; Edmund is made the new Earl of Gloucester."
         },
         {
           "num": 6,
@@ -24952,7 +24980,9 @@
               "ana": "short",
               "texta": true
             }
-          ]
+          ],
+          "location": "A farmhouse near Gloucester's castle",
+          "synopsis": "In a farmhouse shelter, Lear stages a mock trial of his daughters using Edgar, the Fool, and Kent as judges; his madness is now fully apparent. Gloucester warns Kent to flee with Lear toward Dover."
         },
         {
           "num": 7,
@@ -26308,7 +26338,9 @@
               "ana": "verse",
               "texta": true
             }
-          ]
+          ],
+          "location": "Gloucester's castle",
+          "synopsis": "Cornwall, urged on by Regan, interrogates Gloucester and has his eyes put out; a servant fatally wounds Cornwall before being killed. Gloucester, blinded, is thrust out and told to smell his way to Dover."
         }
       ]
     },
@@ -27230,7 +27262,9 @@
               "text": "Poor Tom shall lead thee.",
               "ana": "short"
             }
-          ]
+          ],
+          "location": "The heath",
+          "synopsis": "Edgar encounters his blind, wandering father Gloucester, who does not recognise him; Gloucester asks to be guided to Dover, where he intends to end his life at the cliffs."
         },
         {
           "num": 2,
@@ -28456,7 +28490,9 @@
               "text": "Tell me what more thou know\u2019st.",
               "ana": "short"
             }
-          ]
+          ],
+          "location": "Before the Duke of Albany's palace",
+          "synopsis": "Goneril and Edmund arrive at Albany's palace; Albany confronts Goneril over the treatment of Lear and the blinding of Gloucester. News arrives that Cornwall has died from his wound."
         },
         {
           "num": 3,
@@ -29139,7 +29175,9 @@
               "ana": "short",
               "texta": true
             }
-          ]
+          ],
+          "location": "The French camp near Dover",
+          "synopsis": "Kent learns from a Gentleman that Cordelia has received his letters and wept; Lear, ashamed, refuses to see her even though she is nearby."
         },
         {
           "num": 4,
@@ -29469,7 +29507,9 @@
               "text": "Soon may I hear and see him.",
               "ana": "short"
             }
-          ]
+          ],
+          "location": "The French camp near Dover",
+          "synopsis": "Cordelia sends soldiers to find Lear, who has been seen wandering crowned with wild flowers; a messenger brings word that the British armies are advancing."
         },
         {
           "num": 5,
@@ -29898,7 +29938,9 @@
               "text": "Fare thee well.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "Gloucester's castle",
+          "synopsis": "Regan questions Oswald about Goneril's letters to Edmund, revealing her own interest in him; she asks Oswald to kill Gloucester if he finds him."
         },
         {
           "num": 6,
@@ -32993,7 +33035,9 @@
               "text": "Come, father, I\u2019ll bestow you with a friend.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "The country near Dover",
+          "synopsis": "Edgar leads blind Gloucester to what he pretends is Dover cliff; Gloucester attempts suicide but survives. Lear enters raving in a wild flower crown; Edgar kills Oswald and discovers Goneril's treasonous letter to Edmund."
         },
         {
           "num": 7,
@@ -34101,7 +34145,9 @@
               "ana": "verse",
               "texta": true
             }
-          ]
+          ],
+          "location": "A tent in the French camp near Dover",
+          "synopsis": "Cordelia is reunited with a sleeping Lear; he wakes, confused and penitent, and she comforts him. A battle against the British forces is imminent."
         }
       ]
     },
@@ -34971,7 +35017,9 @@
               "text": "Stands on me to defend, not to debate.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "The British camp near Dover",
+          "synopsis": "Edmund and Albany prepare for battle; Edgar, still disguised, gives Albany Goneril's treasonous letter. Edmund privately resolves to show no mercy to Lear and Cordelia."
         },
         {
           "num": 2,
@@ -35157,7 +35205,9 @@
               "ana": "verse",
               "textb": true
             }
-          ]
+          ],
+          "location": "A field between the two camps",
+          "synopsis": "Battle is joined and quickly over; the French forces are defeated and Lear and Cordelia are captured."
         },
         {
           "num": 3,
@@ -39212,9 +39262,12 @@
               "text": "Shall never see so much nor live so long.",
               "ana": "verse"
             }
-          ]
+          ],
+          "location": "The British camp near Dover",
+          "synopsis": "Edmund sends Lear and Cordelia to prison with a secret order for their execution. Edgar mortally wounds Edmund; Goneril poisons Regan and kills herself. The death order comes too late \u2014 Cordelia has been hanged. Lear enters carrying her body and dies of grief."
         }
       ]
     }
-  ]
+  ],
+  "synopsis": "King Lear dramatizes the story of an aged king of ancient Britain, whose plan to divide his kingdom among his three daughters ends tragically. When he tests each by asking how much she loves him, the older daughters, Goneril and Regan, flatter him. The youngest, Cordelia, does not, and Lear disowns and banishes her. She marries the king of France. Goneril and Regan turn on Lear, leaving him to wander madly in a furious storm. Meanwhile, the Earl of Gloucester's illegitimate son Edmund turns Gloucester against his legitimate son, Edgar. Gloucester, appalled at the daughters' treatment of Lear, gets news that a French army is coming to help Lear. Edmund betrays Gloucester to Regan and her husband, Cornwall, who puts out Gloucester's eyes and makes Edmund the Earl of Gloucester. Cordelia and the French army save Lear, but the army is defeated. Edmund imprisons Cordelia and Lear. Edgar then mortally wounds Edmund in a trial by combat. Dying, Edmund confesses that he has ordered the deaths of Cordelia and Lear. Before they can be rescued, Lear brings in Cordelia's body and then he himself dies."
 }
