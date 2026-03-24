@@ -19,7 +19,7 @@ export default function App() {
   }
   const isTeacher = location.pathname === '/teacher'
   const [session, setSession] = useState<Session | null>(stored)
-  const [showVariants, setShowVariants] = useState(false)
+  const [showVariants, setShowVariants] = useState(true)
   const [name, setName] = useState(''); const [code, setCode] = useState(''); const [initials, setInitials] = useState('')
   const [isNew, setIsNew] = useState(false)
   const [loading, setLoading] = useState(false); const [err, setErr] = useState('')

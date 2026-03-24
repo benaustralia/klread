@@ -21,7 +21,7 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   const [allStudents, setAllStudents] = useState<Student[]>([])
   const [allNotes, setAllNotes] = useState<(Note & { joinCode: string })[]>([])
   const [reading, setReading] = useState<{ joinCode: string; label: string } | null>(null)
-  const [showVariants, setShowVariants] = useState(false)
+  const [showVariants, setShowVariants] = useState(true)
   const [label, setLabel] = useState(''); const [codeInput, setCodeInput] = useState(''); const [creating, setCreating] = useState(false)
   const [newStudent, setNewStudent] = useState<Record<string, { name: string; initials: string }>>({})
   const [addingStudent, setAddingStudent] = useState<Record<string, boolean>>({})
@@ -71,7 +71,11 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
     <TooltipProvider><div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center gap-4">
         <Button variant="neutral" size="sm" onClick={() => setReading(null)}>← Back</Button>
-        <span className="font-sans font-semibold text-sm">{reading.label}</span>
+        <span className="font-sans font-semibold text-sm shrink-0">{reading.label}</span>
+        <span className="flex items-center gap-3 text-xs font-sans font-semibold">
+          <span className="bg-sky-200 border-l-2 border-sky-400 px-2 py-0.5 text-black">‹ › Quarto 1608</span>
+          <span className="bg-yellow-200 border-l-2 border-yellow-400 px-2 py-0.5 text-black">[ ] Folio 1623</span>
+        </span>
         <label className="flex items-center gap-2 text-sm font-sans cursor-pointer ml-auto">
           <span className="text-muted-foreground">Highlight</span>
           <Switch checked={showVariants} onCheckedChange={setShowVariants} />
