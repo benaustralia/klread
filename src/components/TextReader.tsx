@@ -8,6 +8,25 @@ type Scene = { num: number; lines: Line[]; location?: string; synopsis?: string 
 type Act = { num: number; scenes: Scene[] }
 const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V']
 
+const SHORT: Record<string, string> = {
+  "King Lear's palace": "Lear's palace",
+  "The Earl of Gloucester's castle": "Gloucester's castle",
+  "The Duke of Albany's palace": "Albany's palace",
+  "Before the Duke of Albany's palace": "Albany's palace",
+  "Before the Earl of Gloucester's castle": "Gloucester's castle",
+  "The open country": "Open country",
+  "The heath": "The heath",
+  "The heath. Before a hovel": "Heath / hovel",
+  "Gloucester's castle": "Gloucester's castle",
+  "A farmhouse near Gloucester's castle": "Farmhouse",
+  "The French camp near Dover": "French camp",
+  "A tent in the French camp near Dover": "French camp",
+  "The country near Dover": "Near Dover",
+  "The British camp near Dover": "British camp",
+  "A field between the two camps": "The battlefield",
+}
+function shortLocation(loc: string) { return SHORT[loc] ?? loc }
+
 export function TextReader({ acts, showVariants, studentId, studentName, initials }: { acts: Act[]; showVariants: boolean; studentId: string; studentName: string; initials: string }) {
   const [selected, setSelected] = useState<Line | null>(null)
   const [open, setOpen] = useState(false)
@@ -42,26 +61,29 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
 
   return (
     <>
-      <Menubar className="mb-6 w-fit">
-        {acts.map(act => (
-          <MenubarMenu key={act.num}>
-            <MenubarTrigger className={actNum === act.num ? 'font-bold' : ''}>
-              Act {ROMAN[act.num]}
-            </MenubarTrigger>
-            <MenubarContent>
-              {act.scenes.map(scene => (
-                <MenubarItem
-                  key={scene.num}
-                  onClick={() => goTo(act.num, scene.num)}
-                  className={actNum === act.num && sceneNum === scene.num ? 'font-bold' : ''}
-                >
-                  Scene {scene.num}
-                </MenubarItem>
-              ))}
-            </MenubarContent>
-          </MenubarMenu>
-        ))}
-      </Menubar>
+      <div className="flex justify-center mb-6">
+        <Menubar>
+          {acts.map(act => (
+            <MenubarMenu key={act.num}>
+              <MenubarTrigger className={actNum === act.num ? 'font-bold' : ''}>
+                Act {ROMAN[act.num]}
+              </MenubarTrigger>
+              <MenubarContent>
+                {act.scenes.map(scene => (
+                  <MenubarItem
+                    key={scene.num}
+                    onClick={() => goTo(act.num, scene.num)}
+                    className={actNum === act.num && sceneNum === scene.num ? 'font-bold' : ''}
+                  >
+                    <span className="mr-3">Sc. {scene.num}</span>
+                    {scene.location && <span className="text-muted-foreground text-xs">{shortLocation(scene.location)}</span>}
+                  </MenubarItem>
+                ))}
+              </MenubarContent>
+            </MenubarMenu>
+          ))}
+        </Menubar>
+      </div>
 
       <div className="max-w-2xl mx-auto py-4">
         {currentScene?.location && (
