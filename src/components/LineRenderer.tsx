@@ -31,9 +31,10 @@ export function LineRenderer({ line, showVariants, initials, notePosition, onCli
   }
 
   return (
-    <div className={`flex gap-3 items-baseline cursor-pointer hover:bg-black/5 px-2 py-0.5 rounded transition-colors ${highlight}`} onClick={() => onClick(line)}>
-      <span className="text-xs text-gray-400 select-none w-16 shrink-0 text-right font-mono">{line.id}</span>
-      <span className="leading-relaxed flex-1" style={line.ana !== 'prose' ? { paddingLeft: '1.5rem' } : undefined}>
+    // py-0.5 moved to inner text spans so badge can self-stretch to full row height with no padding gaps
+    <div className={`flex gap-3 items-stretch cursor-pointer hover:bg-black/5 px-2 rounded transition-colors ${highlight}`} onClick={() => onClick(line)}>
+      <span className="text-xs text-gray-400 select-none w-16 shrink-0 text-right font-mono py-0.5 self-center">{line.id}</span>
+      <span className="leading-relaxed flex-1 py-0.5" style={line.ana !== 'prose' ? { paddingLeft: '1.5rem' } : undefined}>
         {line.texta && <BracketTip label="Q1 only — text from the First Quarto not found in the Folio"><span className="inline align-baseline text-sky-600 mr-0.5"><TextALeft /></span></BracketTip>}
         {line.textb && <BracketTip label="Folio only — text from the Folio not found in the First Quarto"><span className="inline align-baseline text-yellow-700 mr-0.5"><TextBLeft /></span></BracketTip>}
         {line.text}

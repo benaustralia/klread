@@ -32,7 +32,7 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
 }) {
   const [selected, setSelected] = useState<Line | null>(null)
   const [open, setOpen] = useState(false)
-  const [annotated, setAnnotated] = useState<Map<string, NotePosition>>(new Map())
+  const [annotated, setAnnotated] = useState<Map<string, { pos: NotePosition; anchor: string }>>(new Map())
   const scrolledRef = useRef(false)
   const allLineIds = acts.flatMap(a => a.scenes.flatMap(s => s.lines.map(l => l.id)))
 
@@ -40,18 +40,18 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
     fetch(`/api/notes?studentId=${studentId}`)
       .then(r => r.json())
       .then((notes: { lineId: string; lineIdTo?: string }[]) => {
-        const map = new Map<string, NotePosition>()
+        const map = new Map<string, { pos: NotePosition; anchor: string }>()
         notes.forEach(n => {
           if (n.lineIdTo && n.lineIdTo !== n.lineId) {
             const from = allLineIds.indexOf(n.lineId), to = allLineIds.indexOf(n.lineIdTo)
             if (from !== -1 && to !== -1) {
               allLineIds.slice(from, to + 1).forEach((id, i, arr) => {
                 const pos: NotePosition = i === 0 ? 'start' : i === arr.length - 1 ? 'end' : 'mid'
-                if (!map.has(id) || pos === 'start') map.set(id, pos)
+                if (!map.has(id) || pos === 'start') map.set(id, { pos, anchor: n.lineId })
               })
             }
           } else {
-            if (!map.has(n.lineId)) map.set(n.lineId, 'solo')
+            if (!map.has(n.lineId)) map.set(n.lineId, { pos: 'solo', anchor: n.lineId })
           }
         })
         setAnnotated(map)
@@ -103,7 +103,7 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
   function onNotesSaved(lineId: string) {
     setAnnotated(prev => {
       const next = new Map(prev)
-      if (!next.has(lineId)) next.set(lineId, 'solo')
+      if (!next.has(lineId)) next.set(lineId, { pos: 'solo', anchor: lineId })
       return next
     })
   }
@@ -129,7 +129,12 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
               {showSpk && <p className="speaker-label">{line.speaker}</p>}
               {isStage
                 ? (line.stageType !== 'delivery' && <p className="text-sm italic text-muted-foreground px-2 py-0.5 my-1">{line.text}</p>)
-                : <LineRenderer line={line} showVariants={showVariants} initials={annotated.has(line.id) ? initials : undefined} notePosition={annotated.get(line.id)} onClick={l => { setSelected(l); setOpen(true) }} />}
+                : <LineRenderer line={line} showVariants={showVariants} initials={annotated.has(line.id) ? initials : undefined} notePosition={annotated.get(line.id)?.pos} onClick={l => {
+                    const entry = annotated.get(l.id)
+                    const anchorId = entry?.anchor ?? l.id
+                    const anchorLine = acts.flatMap(a => a.scenes.flatMap(s => s.lines)).find(x => x.id === anchorId) ?? l
+                    setSelected(anchorLine); setOpen(true)
+                  }} />}
             </div>
           )
           return acc
