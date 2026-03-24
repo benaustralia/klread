@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import React from 'react'
-import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar'
 import { LineRenderer, type Line } from './LineRenderer'
 import { NotesSheet } from './NotesSheet'
 
-type Scene = { num: number; lines: Line[]; location?: string; synopsis?: string }
-type Act = { num: number; scenes: Scene[] }
-const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V']
+export type SceneData = { num: number; lines: Line[]; location?: string; synopsis?: string }
+export type ActData = { num: number; scenes: SceneData[] }
+export const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V']
 
 const SHORT: Record<string, string> = {
   "King Lear's palace": "Lear's palace",
@@ -25,13 +24,14 @@ const SHORT: Record<string, string> = {
   "The British camp near Dover": "British camp",
   "A field between the two camps": "The battlefield",
 }
-function shortLocation(loc: string) { return SHORT[loc] ?? loc }
+export function shortLocation(loc: string) { return SHORT[loc] ?? loc }
 
-export function TextReader({ acts, showVariants, studentId, studentName, initials }: { acts: Act[]; showVariants: boolean; studentId: string; studentName: string; initials: string }) {
+export function TextReader({ acts, showVariants, studentId, studentName, initials, actNum, sceneNum }: {
+  acts: ActData[]; showVariants: boolean; studentId: string; studentName: string; initials: string;
+  actNum: number; sceneNum: number;
+}) {
   const [selected, setSelected] = useState<Line | null>(null)
   const [open, setOpen] = useState(false)
-  const [actNum, setActNum] = useState(acts[0]?.num ?? 1)
-  const [sceneNum, setSceneNum] = useState(acts[0]?.scenes[0]?.num ?? 1)
   const [annotated, setAnnotated] = useState<Set<string>>(new Set())
 
   useEffect(() => {
@@ -51,45 +51,19 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
       }).catch(() => {})
   }, [studentId])
 
-  function onNotesSaved(lineId: string) {
-    setAnnotated(prev => new Set([...prev, lineId]))
-  }
-
   useEffect(() => {
     document.title = `Act ${ROMAN[actNum]} · Scene ${sceneNum} — King Lear Promptbook`
     return () => { document.title = 'King Lear Promptbook' }
   }, [actNum, sceneNum])
 
-  function goTo(a: number, s: number) { setActNum(a); setSceneNum(s) }
+  function onNotesSaved(lineId: string) {
+    setAnnotated(prev => new Set([...prev, lineId]))
+  }
 
   const currentScene = acts.find(a => a.num === actNum)?.scenes.find(s => s.num === sceneNum)
 
   return (
     <>
-      <div className="sticky top-20 z-10 bg-background border-b -mx-2 sm:-mx-6 px-2 sm:px-6 py-2 flex justify-center mb-6">
-        <Menubar>
-          {acts.map(act => (
-            <MenubarMenu key={act.num}>
-              <MenubarTrigger className={actNum === act.num ? 'font-bold' : ''}>
-                Act {ROMAN[act.num]}
-              </MenubarTrigger>
-              <MenubarContent>
-                {act.scenes.map(scene => (
-                  <MenubarItem
-                    key={scene.num}
-                    onClick={() => goTo(act.num, scene.num)}
-                    className={actNum === act.num && sceneNum === scene.num ? 'font-bold' : ''}
-                  >
-                    <span className="mr-3">Sc. {scene.num}</span>
-                    {scene.location && <span className="text-muted-foreground text-xs">{shortLocation(scene.location)}</span>}
-                  </MenubarItem>
-                ))}
-              </MenubarContent>
-            </MenubarMenu>
-          ))}
-        </Menubar>
-      </div>
-
       <div className="max-w-2xl mx-auto py-4">
         {currentScene?.location && (
           <div className="mb-6 border-b pb-4">

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { BrokenCrown } from './components/BrokenCrown'
 import { TextReader } from './components/TextReader'
+import { SceneNav } from './components/SceneNav'
 import { TeacherView } from './components/TeacherView'
 import learData from './data/king-lear.json'
 
@@ -24,6 +25,8 @@ export default function App() {
   const isTeacher = location.pathname === '/teacher'
   const [session, setSession] = useState<Session | null>(stored)
   const [showVariants, setShowVariants] = useState(true)
+  const [actNum, setActNum] = useState(1)
+  const [sceneNum, setSceneNum] = useState(1)
   const [name, setName] = useState(() => lastUsed()?.name ?? '')
   const [code, setCode] = useState(() => lastUsed()?.code ?? '')
   const [initials, setInitials] = useState('')
@@ -69,7 +72,8 @@ export default function App() {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between gap-4">
+        <div className="sticky top-0 z-10 bg-background">
+        <header className="border-b px-4 py-3 flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold shrink-0 flex items-center gap-2">
             <BrokenCrown className="w-14 h-14" />
             King Lear <span style={{ color: '#2b96e8' }}>Promptbook</span>
@@ -94,9 +98,15 @@ export default function App() {
             )}
           </div>
         </header>
+        {session && (
+          <div className="border-b py-2 flex justify-center">
+            <SceneNav acts={learData.acts as any} actNum={actNum} sceneNum={sceneNum} onGoTo={(a, s) => { setActNum(a); setSceneNum(s) }} />
+          </div>
+        )}
+        </div>
         <main className="px-2 py-4 sm:px-6">
           {session ? (
-            <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={session.studentId} studentName={session.studentName} initials={session.initials} />
+            <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={session.studentId} studentName={session.studentName} initials={session.initials} actNum={actNum} sceneNum={sceneNum} />
           ) : (
             <div className="flex items-center justify-center py-16">
               <Card className="w-full max-w-lg">

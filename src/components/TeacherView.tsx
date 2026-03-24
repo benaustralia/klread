@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { DataTable } from '@/components/ui/data-table'
 import { TextReader } from './TextReader'
+import { SceneNav } from './SceneNav'
 import learData from '../data/king-lear.json'
 
 type Note = { id: string; studentName: string; joinCode: string; lineId: string; body: string; updatedAt: string }
@@ -38,6 +39,8 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   const [allNotes, setAllNotes] = useState<(Note & { joinCode: string })[]>([])
   const readingParam = new URLSearchParams(location.search).get('reading')
   const [reading, setReadingState] = useState<{ joinCode: string; label: string } | null>(null)
+  const [actNum, setActNum] = useState(1)
+  const [sceneNum, setSceneNum] = useState(1)
   function setReading(val: { joinCode: string; label: string } | null) {
     setReadingState(val)
     const url = new URL(location.href)
@@ -99,20 +102,25 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
 
   if (reading) return (
     <TooltipProvider><div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center gap-4">
-        <Button variant="neutral" size="sm" onClick={() => setReading(null)}>← Back</Button>
-        <span className="font-semibold text-sm shrink-0">{reading.label}</span>
-        <span className="flex items-center gap-3 text-xs font-semibold">
-          <span className="apparatus-quarto">‹ › Quarto 1608</span>
-          <span className="apparatus-folio">[ ] Folio 1623</span>
-        </span>
-        <label className="flex items-center gap-2 text-sm cursor-pointer ml-auto">
-          <span className="text-muted-foreground">Highlight</span>
-          <Switch checked={showVariants} onCheckedChange={setShowVariants} />
-        </label>
-      </header>
+      <div className="sticky top-0 z-10 bg-background">
+        <header className="border-b px-4 py-3 flex items-center gap-4">
+          <Button variant="neutral" size="sm" onClick={() => setReading(null)}>← Back</Button>
+          <span className="font-semibold text-sm shrink-0">{reading.label}</span>
+          <span className="flex items-center gap-3 text-xs font-semibold">
+            <span className="apparatus-quarto">‹ › Quarto 1608</span>
+            <span className="apparatus-folio">[ ] Folio 1623</span>
+          </span>
+          <label className="flex items-center gap-2 text-sm cursor-pointer ml-auto">
+            <span className="text-muted-foreground">Highlight</span>
+            <Switch checked={showVariants} onCheckedChange={setShowVariants} />
+          </label>
+        </header>
+        <div className="border-b py-2 flex justify-center">
+          <SceneNav acts={learData.acts as any} actNum={actNum} sceneNum={sceneNum} onGoTo={(a, s) => { setActNum(a); setSceneNum(s) }} />
+        </div>
+      </div>
       <main className="px-2 py-4 sm:px-6">
-        <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={teacherStudentId ?? ''} studentName={teacherName ?? ''} initials={teacherInitials ?? ''} />
+        <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={teacherStudentId ?? ''} studentName={teacherName ?? ''} initials={teacherInitials ?? ''} actNum={actNum} sceneNum={sceneNum} />
       </main>
     </div></TooltipProvider>
   )
