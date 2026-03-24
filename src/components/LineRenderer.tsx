@@ -24,9 +24,9 @@ export function LineRenderer({ line, showVariants, initials, notePosition, onCli
     } else if (notePosition === 'start') {
       badge = <span className="text-xs font-semibold text-primary border border-b-0 border-border rounded-t px-1 shrink-0">{initials}</span>
     } else if (notePosition === 'mid') {
-      badge = <span className="text-xs font-semibold text-primary/30 border-x border-border px-1 shrink-0 select-none">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      badge = <span className="text-xs font-semibold text-transparent border-x border-border px-1 shrink-0 select-none">{initials}</span>
     } else if (notePosition === 'end') {
-      badge = <span className="text-xs font-semibold text-primary/30 border-x border-b border-border rounded-b px-1 shrink-0 select-none">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      badge = <span className="text-xs font-semibold text-transparent border-x border-b border-border rounded-b px-1 shrink-0 select-none">{initials}</span>
     }
   }
 
