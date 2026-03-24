@@ -55,13 +55,18 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
     setAnnotated(prev => new Set([...prev, lineId]))
   }
 
+  useEffect(() => {
+    document.title = `Act ${ROMAN[actNum]} · Scene ${sceneNum} — King Lear Promptbook`
+    return () => { document.title = 'King Lear Promptbook' }
+  }, [actNum, sceneNum])
+
   function goTo(a: number, s: number) { setActNum(a); setSceneNum(s) }
 
   const currentScene = acts.find(a => a.num === actNum)?.scenes.find(s => s.num === sceneNum)
 
   return (
     <>
-      <div className="flex justify-center mb-6">
+      <div className="sticky top-20 z-10 bg-background border-b -mx-2 sm:-mx-6 px-2 sm:px-6 py-2 flex justify-center mb-6">
         <Menubar>
           {acts.map(act => (
             <MenubarMenu key={act.num}>
