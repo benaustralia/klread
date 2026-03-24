@@ -101,6 +101,25 @@
   }
 }
 
+@keyframes crown-right {
+  0%   { transform: translateX(0);    animation-timing-function: ease-in; }
+  20%  { transform: translateX(5px);  animation-timing-function: ease-out; }
+  40%  { transform: translateX(0);    animation-timing-function: ease-in; }
+  60%  { transform: translateX(5px);  animation-timing-function: ease-out; }
+  80%  { transform: translateX(0);    animation-timing-function: ease-in; }
+  100% { transform: translateX(5px); }
+}
+@keyframes crown-left {
+  0%   { transform: translateX(0);    animation-timing-function: ease-in; }
+  20%  { transform: translateX(-5px); animation-timing-function: ease-out; }
+  40%  { transform: translateX(0);    animation-timing-function: ease-in; }
+  60%  { transform: translateX(-5px); animation-timing-function: ease-out; }
+  80%  { transform: translateX(0);    animation-timing-function: ease-in; }
+  100% { transform: translateX(-5px); }
+}
+.crown-right { animation: crown-right 2s 0.4s 1 forwards; }
+.crown-left  { animation: crown-left  2s 0.4s 1 forwards; }
+
 @layer components {
   .apparatus-quarto {
     @apply bg-sky-200 border-l-2 border-sky-400 px-2 py-0.5 text-black text-xs font-semibold;

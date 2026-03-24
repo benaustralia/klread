@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { BrokenCrown } from './components/BrokenCrown'
 import { TextReader } from './components/TextReader'
 import { TeacherView } from './components/TeacherView'
 import learData from './data/king-lear.json'
@@ -69,7 +70,10 @@ export default function App() {
     <TooltipProvider>
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between gap-4">
-          <h1 className="text-lg font-bold shrink-0">The Lear <span className="text-main">Notebook</span></h1>
+          <h1 className="text-lg font-bold shrink-0 flex items-center gap-2">
+            <BrokenCrown className="w-7 h-7" />
+            The Lear <span className="text-main">Notebook</span>
+          </h1>
           {session && (
             <span className="flex items-center gap-3 text-xs font-semibold">
               <span className="apparatus-quarto">‹ › Quarto 1608</span>
