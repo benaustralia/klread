@@ -60,7 +60,7 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
         <div className="grid flex-1 auto-rows-min gap-6 px-4">
           <div className="grid gap-3">
             <Label htmlFor="note-body">Note</Label>
-            <Textarea id="note-body" placeholder="Write your note…" value={body} onChange={e => setBody(e.target.value)} rows={5} className="font-serif resize-none" />
+            <Textarea id="note-body" placeholder="Write your note…" value={body} onChange={e => setBody(e.target.value)} rows={5} className="resize-none" />
           </div>
 
           <div className="grid gap-3">
@@ -74,7 +74,7 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
               {notes.map(n => (
                 <div key={n.id} className="border-2 border-border rounded-base bg-background p-3 relative">
                   {n.lineIdTo && <p className="text-xs font-mono text-muted-foreground mb-1">{line?.id} — {n.lineIdTo}</p>}
-                  <p className="text-sm font-serif leading-relaxed whitespace-pre-wrap pr-5">{n.body}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap pr-5">{n.body}</p>
                   <p className="text-xs text-muted-foreground mt-2">{new Date(n.updatedAt).toLocaleString()}</p>
                   <button onClick={() => del(n.id)} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive text-xs">✕</button>
                 </div>

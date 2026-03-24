@@ -55,7 +55,7 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
                       acc.last = line.speaker
                       acc.el.push(
                         <div key={line.id}>
-                          {showSpk && <p className="mt-4 mb-1 text-xs font-sans uppercase tracking-widest font-bold border-b pb-1">{line.speaker}</p>}
+                          {showSpk && <p className="speaker-label">{line.speaker}</p>}
                           <LineRenderer line={line} showVariants={showVariants} initials={annotated.has(line.id) ? initials : undefined} onClick={l => { setSelected(l); setOpen(true) }} />
                         </div>
                       )

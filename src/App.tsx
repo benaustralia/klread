@@ -63,10 +63,10 @@ export default function App() {
   return (
     <TooltipProvider>
       <Dialog open={dialogOpen}>
-        <DialogContent className="font-serif sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-serif text-xl">King Lear</DialogTitle>
-            <DialogDescription className="font-sans text-sm">Enter your name and the join code from your teacher.</DialogDescription>
+            <DialogTitle className="text-xl">King Lear</DialogTitle>
+            <DialogDescription className="text-sm">Enter your name and the join code from your teacher.</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 mt-2">
             <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
@@ -79,22 +79,22 @@ export default function App() {
       </Dialog>
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between gap-4">
-          <h1 className="font-serif text-lg font-bold shrink-0">King Lear</h1>
+          <h1 className="text-lg font-bold shrink-0">King Lear</h1>
           {session && (
-            <span className="flex items-center gap-3 text-xs font-sans font-semibold">
-              <span className="bg-sky-200 border-l-2 border-sky-400 px-2 py-0.5 text-black">‹ › Quarto 1608</span>
-              <span className="bg-yellow-200 border-l-2 border-yellow-400 px-2 py-0.5 text-black">[ ] Folio 1623</span>
+            <span className="flex items-center gap-3 text-xs font-semibold">
+              <span className="apparatus-quarto">‹ › Quarto 1608</span>
+              <span className="apparatus-folio">[ ] Folio 1623</span>
             </span>
           )}
           <div className="flex items-center gap-3 shrink-0">
             {session && (
-              <label className="flex items-center gap-2 text-sm font-sans cursor-pointer">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <span className="text-muted-foreground">Highlight</span>
                 <Switch checked={showVariants} onCheckedChange={setShowVariants} />
               </label>
             )}
             {session && (
-              <Button onClick={() => { localStorage.removeItem(KEY); setSession(null) }} variant="neutral" size="sm" className="font-sans text-xs">
+              <Button onClick={() => { localStorage.removeItem(KEY); setSession(null) }} variant="neutral" size="sm" className="text-xs">
                 Log out
               </Button>
             )}

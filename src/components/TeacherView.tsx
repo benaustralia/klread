@@ -24,7 +24,7 @@ const studentColumns: ColumnDef<Student>[] = [
 const noteColumns: ColumnDef<Note>[] = [
   { accessorKey: 'studentName', header: 'Student' },
   { accessorKey: 'lineId', header: 'Line', cell: ({ row }) => <span className="font-mono text-primary">{row.getValue('lineId')}</span> },
-  { accessorKey: 'body', header: 'Note', cell: ({ row }) => <span className="font-serif leading-relaxed">{row.getValue('body')}</span> },
+  { accessorKey: 'body', header: 'Note', cell: ({ row }) => <span className="leading-relaxed">{row.getValue('body')}</span> },
   { accessorKey: 'updatedAt', header: 'When', cell: ({ row }) => <span className="text-muted-foreground">{new Date(row.getValue('updatedAt')).toLocaleString()}</span> },
 ]
 
@@ -87,12 +87,12 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
     <TooltipProvider><div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center gap-4">
         <Button variant="neutral" size="sm" onClick={() => setReading(null)}>← Back</Button>
-        <span className="font-sans font-semibold text-sm shrink-0">{reading.label}</span>
-        <span className="flex items-center gap-3 text-xs font-sans font-semibold">
-          <span className="bg-sky-200 border-l-2 border-sky-400 px-2 py-0.5 text-black">‹ › Quarto 1608</span>
-          <span className="bg-yellow-200 border-l-2 border-yellow-400 px-2 py-0.5 text-black">[ ] Folio 1623</span>
+        <span className="font-semibold text-sm shrink-0">{reading.label}</span>
+        <span className="flex items-center gap-3 text-xs font-semibold">
+          <span className="apparatus-quarto">‹ › Quarto 1608</span>
+          <span className="apparatus-folio">[ ] Folio 1623</span>
         </span>
-        <label className="flex items-center gap-2 text-sm font-sans cursor-pointer ml-auto">
+        <label className="flex items-center gap-2 text-sm cursor-pointer ml-auto">
           <span className="text-muted-foreground">Highlight</span>
           <Switch checked={showVariants} onCheckedChange={setShowVariants} />
         </label>
@@ -104,7 +104,7 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   )
 
   return (
-    <div className="max-w-4xl mx-auto p-6 font-sans">
+    <div className="max-w-4xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Teacher view</h1>
         <Button variant="neutral" size="sm" onClick={logout}>Log out</Button>

@@ -24,7 +24,7 @@ export function LineRenderer({ line, showVariants, initials, onClick }: { line: 
         {line.texta && <span className="inline align-baseline text-sky-600 ml-0.5"><TextARight /></span>}
         {line.textb && <span className="inline align-baseline text-yellow-700 ml-0.5"><TextBRight /></span>}
       </span>
-      {initials && <span className="text-xs font-sans font-semibold text-primary border border-border rounded px-1 shrink-0">{initials}</span>}
+      {initials && <span className="text-xs font-semibold text-primary border border-border rounded px-1 shrink-0">{initials}</span>}
     </div>
   )
 }

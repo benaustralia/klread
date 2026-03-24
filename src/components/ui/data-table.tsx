@@ -32,7 +32,7 @@ export function DataTable<TData, TValue>({ columns, data, pageSize = 20 }: DataT
   })
 
   return (
-    <div className="w-full font-sans text-main-foreground">
+    <div className="w-full text-main-foreground">
       <Table>
         <TableHeader className="font-heading">
           {table.getHeaderGroups().map(hg => (
