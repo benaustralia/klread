@@ -59,32 +59,6 @@ export default function App() {
 
   if (isTeacher || session?.isTeacher) return <TeacherView teacherKey={session?.joinCode ?? new URLSearchParams(location.search).get('key') ?? ''} teacherStudentId={session?.studentId} teacherName={session?.studentName} teacherInitials={session?.initials} />
 
-  if (!session && !isTeacher) return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>King Lear</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-6">
-          <Input id="login-name" placeholder="your first name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
-          <Input id="login-code" placeholder="class code" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} />
-          {isNew && (
-            <div className="grid gap-3">
-              <Label htmlFor="login-initials">Initials</Label>
-              <Input id="login-initials" placeholder="e.g. BH" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} autoFocus />
-            </div>
-          )}
-          {err && <p className="text-destructive text-sm">{err}</p>}
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full italic" onClick={join} disabled={loading}>
-            {loading ? 'Joining…' : name.trim() ? `Enter ${name.trim().split(' ')[0]}` : 'Enter...'}
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
-  )
-
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
@@ -111,9 +85,33 @@ export default function App() {
           </div>
         </header>
         <main className="px-2 py-4 sm:px-6">
-          {session
-            ? <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={session.studentId} studentName={session.studentName} initials={session.initials} />
-            : null}
+          {session ? (
+            <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={session.studentId} studentName={session.studentName} initials={session.initials} />
+          ) : (
+            <div className="flex items-center justify-center py-16">
+              <Card className="w-full max-w-sm">
+                <CardHeader>
+                  <CardTitle>Mark it, nuncle.</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-6">
+                  <Input id="login-name" placeholder="your first name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
+                  <Input id="login-code" placeholder="class code" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} />
+                  {isNew && (
+                    <div className="grid gap-3">
+                      <Label htmlFor="login-initials">Initials</Label>
+                      <Input id="login-initials" placeholder="e.g. BH" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} autoFocus />
+                    </div>
+                  )}
+                  {err && <p className="text-destructive text-sm">{err}</p>}
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full italic" onClick={join} disabled={loading}>
+                    {loading ? 'Joining…' : name.trim() ? `Enter ${name.trim().split(' ')[0]}` : 'Enter...'}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          )}
         </main>
       </div>
     </TooltipProvider>
