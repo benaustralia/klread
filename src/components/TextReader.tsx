@@ -101,7 +101,7 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
             <div key={line.id}>
               {showSpk && <p className="speaker-label">{line.speaker}</p>}
               {isStage
-                ? <p className="text-sm italic text-muted-foreground px-2 py-0.5 my-1">{line.text}</p>
+                ? (line.stageType !== 'delivery' && <p className="text-sm italic text-muted-foreground px-2 py-0.5 my-1">{line.text}</p>)
                 : <LineRenderer line={line} showVariants={showVariants} initials={annotated.has(line.id) ? initials : undefined} onClick={l => { setSelected(l); setOpen(true) }} />}
             </div>
           )
