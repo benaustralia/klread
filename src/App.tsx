@@ -72,16 +72,16 @@ export default function App() {
               <Switch checked={showVariants} onCheckedChange={setShowVariants} />
             </label>
             {session && (
-              <button onClick={() => { localStorage.removeItem(KEY); setSession(null) }} className="text-xs font-sans text-muted-foreground hover:text-foreground transition-colors">
+              <Button onClick={() => { localStorage.removeItem(KEY); setSession(null) }} variant="neutral" size="sm" className="font-sans text-xs">
                 Log out
-              </button>
+              </Button>
             )}
           </div>
         </header>
         <main className="px-2 py-4 sm:px-6">
           {session
             ? <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={session.studentId} studentName={session.studentName} />
-            : <p className="text-center text-muted-foreground mt-16 font-sans">Please join a session to begin.</p>}
+            : null}
         </main>
       </div>
     </TooltipProvider>
