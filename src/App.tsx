@@ -83,7 +83,7 @@ export default function App() {
           {err && <p className="text-destructive text-sm">{err}</p>}
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={join} disabled={loading}>{loading ? 'Joining…' : 'Join'}</Button>
+          <Button className="w-full" onClick={join} disabled={loading}>{loading ? 'Joining…' : 'Come hither...'}</Button>
         </CardFooter>
       </Card>
     </div>
