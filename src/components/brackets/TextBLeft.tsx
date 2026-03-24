@@ -14,7 +14,7 @@ export function TextBLeft({ className }: Props) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      aria-hidden
+      style={{ display: "inline", verticalAlign: "middle" }} aria-hidden
     >
       <path d="M5,1 L2,1 L2,13 L5,13" />
     </svg>

@@ -14,7 +14,7 @@ export function TextBRight({ className }: Props) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      aria-hidden
+      style={{ display: "inline", verticalAlign: "middle" }} aria-hidden
     >
       <path d="M1,1 L4,1 L4,13 L1,13" />
     </svg>

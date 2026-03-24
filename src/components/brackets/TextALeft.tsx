@@ -14,7 +14,7 @@ export function TextALeft({ className }: Props) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      aria-hidden
+      style={{ display: "inline", verticalAlign: "middle" }} aria-hidden
     >
       <polyline points="5,1 1,7 5,13" />
     </svg>

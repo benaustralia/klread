@@ -14,7 +14,7 @@ export function TextARight({ className }: Props) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      aria-hidden
+      style={{ display: "inline", verticalAlign: "middle" }} aria-hidden
     >
       <polyline points="1,1 5,7 1,13" />
     </svg>
