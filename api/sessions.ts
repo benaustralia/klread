@@ -16,6 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'POST') {
     const { studentName, joinCode, initials } = req.body ?? {}
     if (!studentName || !joinCode) return res.status(400).json({ error: 'studentName and joinCode required' })
+    const valid = await sql`SELECT 1 FROM classes WHERE join_code = ${joinCode}`
+    if (!valid.length) return res.status(400).json({ error: 'Invalid join code' })
     const rows = await sql`INSERT INTO sessions (student_name, join_code, initials) VALUES (${studentName}, ${joinCode}, ${initials ?? ''}) ON CONFLICT (student_name, join_code) DO UPDATE SET initials = EXCLUDED.initials RETURNING student_id AS "studentId", initials`
     return res.json(rows[0])
   }
