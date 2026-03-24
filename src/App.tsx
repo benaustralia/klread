@@ -66,10 +66,17 @@ export default function App() {
               <span className="text-sky-600 font-bold">‹ › Quarto 1608</span>
             </span>
           )}
-          <label className="flex items-center gap-2 text-sm font-sans cursor-pointer shrink-0">
-            <span className="text-muted-foreground">Apparatus</span>
-            <Switch checked={showVariants} onCheckedChange={setShowVariants} />
-          </label>
+          <div className="flex items-center gap-3 shrink-0">
+            <label className="flex items-center gap-2 text-sm font-sans cursor-pointer">
+              <span className="text-muted-foreground">Apparatus</span>
+              <Switch checked={showVariants} onCheckedChange={setShowVariants} />
+            </label>
+            {session && (
+              <button onClick={() => { localStorage.removeItem(KEY); setSession(null) }} className="text-xs font-sans text-muted-foreground hover:text-foreground transition-colors">
+                Log out
+              </button>
+            )}
+          </div>
         </header>
         <main className="px-2 py-4 sm:px-6">
           {session
