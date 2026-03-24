@@ -72,7 +72,7 @@ export default function App() {
         <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold shrink-0 flex items-center gap-2">
             <BrokenCrown className="w-7 h-7" />
-            The Lear <span className="text-main">Notebook</span>
+            King Lear <span className="text-main">Promptbook</span>
           </h1>
           {session && (
             <span className="flex items-center gap-3 text-xs font-semibold">
