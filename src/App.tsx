@@ -68,7 +68,7 @@ export default function App() {
         <CardContent className="grid gap-6">
           <div className="grid gap-3">
             <Label htmlFor="login-name">Name</Label>
-            <Input id="login-name" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
+            <Input id="login-name" placeholder="your first name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
           </div>
           <div className="grid gap-3">
             <Label htmlFor="login-code">Join code</Label>
