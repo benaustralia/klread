@@ -49,7 +49,7 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
               </TabsList>
               {act.scenes.map(scene => (
                 <TabsContent key={scene.num} value={String(scene.num)}>
-                  <div className="max-w-2xl mx-auto py-4">
+                  <div className="max-w-2xl py-4">
                     {scene.lines.reduce<{ el: React.ReactElement[]; last: string | undefined }>((acc, line) => {
                       const showSpk = line.speaker && line.speaker !== acc.last
                       acc.last = line.speaker
