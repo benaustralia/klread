@@ -1,16 +1,32 @@
 import { useState, useEffect } from 'react'
+import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { DataTable } from '@/components/ui/data-table'
 import { TextReader } from './TextReader'
 import learData from '../data/king-lear.json'
 
-type Note = { id: string; studentName: string; lineId: string; body: string; updatedAt: string }
+type Note = { id: string; studentName: string; joinCode: string; lineId: string; body: string; updatedAt: string }
 type Class = { joinCode: string; label: string; createdAt: string }
-type Student = { studentId: string; studentName: string; initials: string; lastSeen: string; noteCount: number }
+type Student = { studentId: string; studentName: string; joinCode: string; initials: string; lastSeen: string; noteCount: number }
+
+const studentColumns: ColumnDef<Student>[] = [
+  { accessorKey: 'studentName', header: 'Name' },
+  { accessorKey: 'initials', header: 'Initials', cell: ({ row }) => <span className="font-mono text-xs">{row.getValue('initials')}</span> },
+  { accessorKey: 'noteCount', header: 'Notes', cell: ({ row }) => <Badge>{row.getValue('noteCount')}</Badge> },
+  { accessorKey: 'lastSeen', header: 'Last seen', cell: ({ row }) => { const v = row.getValue('lastSeen') as string; return <span className="text-muted-foreground">{v ? new Date(v).toLocaleString() : '—'}</span> } },
+]
+
+const noteColumns: ColumnDef<Note>[] = [
+  { accessorKey: 'studentName', header: 'Student' },
+  { accessorKey: 'lineId', header: 'Line', cell: ({ row }) => <span className="font-mono text-primary">{row.getValue('lineId')}</span> },
+  { accessorKey: 'body', header: 'Note', cell: ({ row }) => <span className="font-serif leading-relaxed">{row.getValue('body')}</span> },
+  { accessorKey: 'updatedAt', header: 'When', cell: ({ row }) => <span className="text-muted-foreground">{new Date(row.getValue('updatedAt')).toLocaleString()}</span> },
+]
 
 const logout = () => { localStorage.removeItem('klread_session'); location.href = '/' }
 
@@ -122,41 +138,15 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
                     <Button size="sm" variant="neutral" onClick={() => document.getElementById('notes-' + c.joinCode)?.scrollIntoView({ behavior: 'smooth' })}>View student notes</Button>
                     <button onClick={() => deleteCode(c.joinCode)} className="ml-auto text-xs text-muted-foreground hover:text-destructive">Delete code</button>
                   </div>
-                  <table className="w-full text-sm border-collapse mb-6">
-                    <thead><tr className="border-b text-xs uppercase tracking-wider text-muted-foreground text-left"><th className="py-2 pr-4">Name</th><th className="py-2 pr-4">Initials</th><th className="py-2 pr-4">Notes</th><th className="py-2">Last seen</th></tr></thead>
-                    <tbody>
-                      {students.length ? students.map((s: any) => (
-                        <tr key={s.studentId} className="border-b">
-                          <td className="py-2 pr-4">{s.studentName}</td>
-                          <td className="py-2 pr-4 font-mono text-xs">{s.initials}</td>
-                          <td className="py-2 pr-4"><Badge>{s.noteCount}</Badge></td>
-                          <td className="py-2 text-xs text-muted-foreground">{s.lastSeen ? new Date(s.lastSeen).toLocaleString() : '—'}</td>
-                        </tr>
-                      )) : <tr><td colSpan={4} className="py-2 text-muted-foreground text-sm">No students yet.</td></tr>}
-                      <tr>
-                        <td className="pt-2 pr-2"><Input placeholder="Student name" value={newStudent[c.joinCode]?.name ?? ''} onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], name: e.target.value } }))} className="h-7 text-xs" /></td>
-                        <td className="pt-2 pr-2"><Input placeholder="Initials" value={newStudent[c.joinCode]?.initials ?? ''} onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], initials: e.target.value.toUpperCase().slice(0, 4) } }))} onKeyDown={e => e.key === 'Enter' && addStudent(c.joinCode)} className="h-7 text-xs uppercase w-24" maxLength={4} /></td>
-                        <td colSpan={2} className="pt-2"><Button size="sm" onClick={() => addStudent(c.joinCode)} disabled={addingStudent[c.joinCode]}>{addingStudent[c.joinCode] ? 'Adding…' : 'Add'}</Button></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div id={'notes-' + c.joinCode}>
+                  <div className="flex gap-2 mb-3 flex-wrap">
+                    <Input placeholder="Student name" value={newStudent[c.joinCode]?.name ?? ''} onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], name: e.target.value } }))} className="h-7 text-xs max-w-xs" />
+                    <Input placeholder="Initials" value={newStudent[c.joinCode]?.initials ?? ''} onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], initials: e.target.value.toUpperCase().slice(0, 4) } }))} onKeyDown={e => e.key === 'Enter' && addStudent(c.joinCode)} className="h-7 text-xs uppercase w-24" maxLength={4} />
+                    <Button size="sm" onClick={() => addStudent(c.joinCode)} disabled={addingStudent[c.joinCode]}>{addingStudent[c.joinCode] ? 'Adding…' : 'Add student'}</Button>
+                  </div>
+                  <DataTable columns={studentColumns} data={students} pageSize={10} />
+                  <div id={'notes-' + c.joinCode} className="mt-6">
                     <p className="text-sm font-semibold mb-3">Student notes</p>
-                    {!notes.length && <p className="text-sm text-muted-foreground">No notes yet.</p>}
-                    {Object.entries(byStudent).map(([student, rows]) => (
-                      <div key={student} className="mb-4">
-                        <p className="text-xs font-semibold uppercase tracking-wider mb-1 flex items-center gap-2">{student} <Badge>{rows.length}</Badge></p>
-                        <table className="w-full text-sm border-collapse">
-                          <tbody>{rows.map(n => (
-                            <tr key={n.id} className="border-b hover:bg-muted/50">
-                              <td className="py-1.5 pr-4 font-mono text-primary w-20">{n.lineId}</td>
-                              <td className="py-1.5 pr-4 font-serif">{n.body}</td>
-                              <td className="py-1.5 text-xs text-muted-foreground whitespace-nowrap">{new Date(n.updatedAt).toLocaleString()}</td>
-                            </tr>
-                          ))}</tbody>
-                        </table>
-                      </div>
-                    ))}
+                    {notes.length ? <DataTable columns={noteColumns} data={notes} pageSize={20} /> : <p className="text-sm text-muted-foreground">No notes yet.</p>}
                   </div>
                 </AccordionContent>
               </AccordionItem>

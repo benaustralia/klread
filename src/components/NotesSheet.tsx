@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import type { Line } from './LineRenderer'
 
 type Note = { id: string; body: string; lineIdTo?: string; updatedAt: string }
 
-export function NotesSheet({ line, open, onOpenChange, studentId, studentName, onSaved }: { line: Line | null; open: boolean; onOpenChange: (v: boolean) => void; studentId: string; studentName: string; onSaved?: (lineId: string) => void }) {
+export function NotesSheet({ line, open, onOpenChange, studentId, studentName, onSaved }: {
+  line: Line | null; open: boolean; onOpenChange: (v: boolean) => void
+  studentId: string; studentName: string; onSaved?: (lineId: string) => void
+}) {
   const [body, setBody] = useState('')
   const [lineIdTo, setLineIdTo] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
@@ -17,13 +20,20 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
   useEffect(() => {
     if (!open || !line || !studentId) return
     setBody(''); setLineIdTo('')
-    fetch(`/api/notes?studentId=${studentId}`).then(r => r.json()).then((all: Note[]) => setNotes(all.filter((n: any) => n.lineId === line.id))).catch(() => {})
+    fetch(`/api/notes?studentId=${studentId}`)
+      .then(r => r.json())
+      .then((all: Note[]) => setNotes(all.filter((n: any) => n.lineId === line.id)))
+      .catch(() => {})
   }, [open, line?.id])
 
   async function save() {
     if (!body.trim() || !line) return
     setSaving(true)
-    await fetch('/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentId, studentName, lineId: line.id, lineIdTo: lineIdTo.trim() || null, act: line.act, scene: line.scene, body: body.trim() }) }).catch(() => {})
+    await fetch('/api/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ studentId, studentName, lineId: line.id, lineIdTo: lineIdTo.trim() || null, act: line.act, scene: line.scene, body: body.trim() })
+    }).catch(() => {})
     setBody(''); setLineIdTo('')
     const all = await fetch(`/api/notes?studentId=${studentId}`).then(r => r.json()).catch(() => [])
     setNotes(all.filter((n: any) => n.lineId === line.id))
@@ -38,36 +48,47 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto font-serif">
-        <SheetHeader><SheetTitle className="font-serif">Note — {line?.id}</SheetTitle></SheetHeader>
-        {line && (
-          <div className="mt-4 mb-4 p-3 bg-muted rounded text-sm border">
-            {line.speaker && <span className="block text-xs uppercase tracking-widest font-sans font-semibold mb-1">{line.speaker}</span>}
-            {line.text}
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>{line?.id}</SheetTitle>
+          <SheetDescription>
+            {line?.speaker && <span className="block font-bold uppercase tracking-widest text-xs mb-0.5">{line.speaker}</span>}
+            {line?.text}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="grid flex-1 auto-rows-min gap-6 px-4">
+          <div className="grid gap-3">
+            <Label htmlFor="note-body">Note</Label>
+            <Textarea id="note-body" placeholder="Write your note…" value={body} onChange={e => setBody(e.target.value)} rows={5} className="font-serif resize-none" />
           </div>
-        )}
-        <Textarea placeholder="Write your note…" value={body} onChange={e => setBody(e.target.value)} rows={4} className="font-serif resize-none mb-3" />
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs font-sans text-muted-foreground shrink-0">Lines {line?.id} —</span>
-          <Input placeholder={line?.id ?? ''} value={lineIdTo} onChange={e => setLineIdTo(e.target.value)} className="h-7 text-xs font-mono flex-1" />
-          <span className="text-xs font-sans text-muted-foreground shrink-0">(optional range)</span>
+
+          <div className="grid gap-3">
+            <Label htmlFor="note-range">To line <span className="font-normal text-muted-foreground">(optional)</span></Label>
+            <Input id="note-range" placeholder={line?.id ?? '1.1.1'} value={lineIdTo} onChange={e => setLineIdTo(e.target.value)} className="font-mono" />
+          </div>
+
+          {notes.length > 0 && (
+            <div className="grid gap-3">
+              <Label>Saved notes</Label>
+              {notes.map(n => (
+                <div key={n.id} className="border-2 border-border rounded-base bg-background p-3 relative">
+                  {n.lineIdTo && <p className="text-xs font-mono text-muted-foreground mb-1">{line?.id} — {n.lineIdTo}</p>}
+                  <p className="text-sm font-serif leading-relaxed whitespace-pre-wrap pr-5">{n.body}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{new Date(n.updatedAt).toLocaleString()}</p>
+                  <button onClick={() => del(n.id)} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive text-xs">✕</button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <Button onClick={save} disabled={saving || !body.trim()} className="w-full">{saving ? 'Saving…' : 'Save note'}</Button>
-        {notes.length > 0 && (
-          <div className="mt-6 flex flex-col gap-3">
-            <h3 className="text-sm font-semibold font-sans">Saved notes</h3>
-            {notes.map(n => (
-              <Card key={n.id} className="relative">
-                <CardContent className="pt-4 pb-3 pr-10">
-                  {n.lineIdTo && <p className="text-xs font-mono text-muted-foreground font-sans mb-1">{line?.id} — {n.lineIdTo}</p>}
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{n.body}</p>
-                  <p className="text-xs text-muted-foreground mt-2 font-sans">{new Date(n.updatedAt).toLocaleString()}</p>
-                </CardContent>
-                <button onClick={() => del(n.id)} className="absolute top-2 right-2 text-xs text-muted-foreground hover:text-destructive">✕</button>
-              </Card>
-            ))}
-          </div>
-        )}
+
+        <SheetFooter>
+          <Button onClick={save} disabled={saving || !body.trim()}>{saving ? 'Saving…' : 'Save note'}</Button>
+          <SheetClose asChild>
+            <Button variant="neutral">Close</Button>
+          </SheetClose>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   )
