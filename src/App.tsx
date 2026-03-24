@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Switch } from '@/components/ui/switch'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { TextReader } from './components/TextReader'
@@ -37,8 +38,6 @@ export default function App() {
       }).catch(() => {})
   }, [])
 
-  const dialogOpen = !session && !isTeacher
-
   async function join() {
     if (!name.trim() || !code.trim()) return setErr('Enter your name and join code')
     setLoading(true); setErr('')
@@ -60,22 +59,38 @@ export default function App() {
 
   if (isTeacher || session?.isTeacher) return <TeacherView teacherKey={session?.joinCode ?? new URLSearchParams(location.search).get('key') ?? ''} teacherStudentId={session?.studentId} teacherName={session?.studentName} teacherInitials={session?.initials} />
 
+  if (!session && !isTeacher) return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>King Lear</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          <div className="grid gap-3">
+            <Label htmlFor="login-name">Name</Label>
+            <Input id="login-name" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="login-code">Join code</Label>
+            <Input id="login-code" placeholder="e.g. WFVCE26" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" />
+          </div>
+          {isNew && (
+            <div className="grid gap-3">
+              <Label htmlFor="login-initials">Initials</Label>
+              <Input id="login-initials" placeholder="e.g. BH" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} autoFocus />
+            </div>
+          )}
+          {err && <p className="text-destructive text-sm">{err}</p>}
+        </CardContent>
+        <CardFooter>
+          <Button className="w-full" onClick={join} disabled={loading}>{loading ? 'Joining…' : 'Join'}</Button>
+        </CardFooter>
+      </Card>
+    </div>
+  )
+
   return (
     <TooltipProvider>
-      <Dialog open={dialogOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="text-xl">King Lear</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 mt-2">
-            <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
-            <Input placeholder="Join code (e.g. WFVCE26)" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" />
-            {err && <p className="text-destructive text-sm">{err}</p>}
-            {isNew && <Input placeholder="Initials (e.g. BH)" value={initials} onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" maxLength={4} autoFocus />}
-            <Button onClick={join} disabled={loading}>{loading ? 'Joining…' : 'Join'}</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between gap-4">
           <h1 className="text-lg font-bold shrink-0">King Lear</h1>
