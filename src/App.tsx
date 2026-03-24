@@ -66,14 +66,8 @@ export default function App() {
           <CardTitle>King Lear</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-6">
-          <div className="grid gap-3">
-            <Label htmlFor="login-name">Name</Label>
-            <Input id="login-name" placeholder="your first name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="login-code">Join code</Label>
-            <Input id="login-code" placeholder="e.g. WFVCE26" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" />
-          </div>
+          <Input id="login-name" placeholder="your first name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
+          <Input id="login-code" placeholder="class code" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} className="uppercase" />
           {isNew && (
             <div className="grid gap-3">
               <Label htmlFor="login-initials">Initials</Label>
@@ -83,7 +77,9 @@ export default function App() {
           {err && <p className="text-destructive text-sm">{err}</p>}
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={join} disabled={loading}>{loading ? 'Joining…' : 'Come hither...'}</Button>
+          <Button className="w-full italic" onClick={join} disabled={loading}>
+            {loading ? 'Joining…' : name.trim() ? `Enter ${name.trim().split(' ')[0]}` : 'Come hither...'}
+          </Button>
         </CardFooter>
       </Card>
     </div>
