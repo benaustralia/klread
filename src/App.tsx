@@ -8,6 +8,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { BrokenCrown } from './components/BrokenCrown'
 import { TextReader } from './components/TextReader'
 import { SceneNav } from './components/SceneNav'
+import { Progress } from '@/components/ui/progress'
 import { TeacherView } from './components/TeacherView'
 import learData from './data/king-lear.json'
 
@@ -27,6 +28,17 @@ export default function App() {
   const [showVariants, setShowVariants] = useState(true)
   const [actNum, setActNum] = useState(1)
   const [sceneNum, setSceneNum] = useState(1)
+  const [scrollProgress, setScrollProgress] = useState(0)
+
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.documentElement
+      const pct = el.scrollTop / (el.scrollHeight - el.clientHeight) * 100
+      setScrollProgress(isNaN(pct) ? 0 : Math.round(pct))
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
   const [name, setName] = useState(() => lastUsed()?.name ?? '')
   const [code, setCode] = useState(() => lastUsed()?.code ?? '')
   const [initials, setInitials] = useState('')
@@ -99,8 +111,9 @@ export default function App() {
           </div>
         </header>
         {session && (
-          <div className="border-b py-2 flex justify-center">
+          <div className="border-b py-2 flex flex-col items-center gap-2">
             <SceneNav acts={learData.acts as any} actNum={actNum} sceneNum={sceneNum} onGoTo={(a, s) => { setActNum(a); setSceneNum(s) }} />
+            <Progress value={scrollProgress} className="w-full rounded-none border-0 h-1" />
           </div>
         )}
         </div>

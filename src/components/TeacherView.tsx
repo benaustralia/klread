@@ -9,6 +9,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { DataTable } from '@/components/ui/data-table'
 import { TextReader } from './TextReader'
 import { SceneNav } from './SceneNav'
+import { Progress } from '@/components/ui/progress'
 import learData from '../data/king-lear.json'
 
 type Note = { id: string; studentName: string; joinCode: string; lineId: string; body: string; updatedAt: string }
@@ -41,6 +42,17 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   const [reading, setReadingState] = useState<{ joinCode: string; label: string } | null>(null)
   const [actNum, setActNum] = useState(1)
   const [sceneNum, setSceneNum] = useState(1)
+  const [scrollProgress, setScrollProgress] = useState(0)
+
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.documentElement
+      const pct = el.scrollTop / (el.scrollHeight - el.clientHeight) * 100
+      setScrollProgress(isNaN(pct) ? 0 : Math.round(pct))
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
   function setReading(val: { joinCode: string; label: string } | null) {
     setReadingState(val)
     const url = new URL(location.href)
@@ -115,8 +127,9 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
             <Switch checked={showVariants} onCheckedChange={setShowVariants} />
           </label>
         </header>
-        <div className="border-b py-2 flex justify-center">
+        <div className="border-b py-2 flex flex-col items-center gap-2">
           <SceneNav acts={learData.acts as any} actNum={actNum} sceneNum={sceneNum} onGoTo={(a, s) => { setActNum(a); setSceneNum(s) }} />
+          <Progress value={scrollProgress} className="w-full rounded-none border-0 h-1" />
         </div>
       </div>
       <main className="px-2 py-4 sm:px-6">
