@@ -15,10 +15,20 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
   const [annotated, setAnnotated] = useState<Set<string>>(new Set())
 
   useEffect(() => {
+    const allLineIds = acts.flatMap(a => a.scenes.flatMap(s => s.lines.map(l => l.id)))
     fetch(`/api/notes?studentId=${studentId}`)
       .then(r => r.json())
-      .then((notes: { lineId: string }[]) => setAnnotated(new Set(notes.map(n => n.lineId))))
-      .catch(() => {})
+      .then((notes: { lineId: string; lineIdTo?: string }[]) => {
+        const ids = new Set<string>()
+        notes.forEach(n => {
+          ids.add(n.lineId)
+          if (n.lineIdTo) {
+            const from = allLineIds.indexOf(n.lineId), to = allLineIds.indexOf(n.lineIdTo)
+            if (from !== -1 && to !== -1) allLineIds.slice(from, to + 1).forEach(id => ids.add(id))
+          }
+        })
+        setAnnotated(ids)
+      }).catch(() => {})
   }, [studentId])
 
   function onNotesSaved(lineId: string) {

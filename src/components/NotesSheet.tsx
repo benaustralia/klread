@@ -1,28 +1,30 @@
 import { useState, useEffect } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Line } from './LineRenderer'
 
-type Note = { id: string; body: string; updatedAt: string }
+type Note = { id: string; body: string; lineIdTo?: string; updatedAt: string }
 
 export function NotesSheet({ line, open, onOpenChange, studentId, studentName, onSaved }: { line: Line | null; open: boolean; onOpenChange: (v: boolean) => void; studentId: string; studentName: string; onSaved?: (lineId: string) => void }) {
   const [body, setBody] = useState('')
+  const [lineIdTo, setLineIdTo] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!open || !line || !studentId) return
-    setBody('')
+    setBody(''); setLineIdTo('')
     fetch(`/api/notes?studentId=${studentId}`).then(r => r.json()).then((all: Note[]) => setNotes(all.filter((n: any) => n.lineId === line.id))).catch(() => {})
   }, [open, line?.id])
 
   async function save() {
     if (!body.trim() || !line) return
     setSaving(true)
-    await fetch('/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentId, studentName, lineId: line.id, act: line.act, scene: line.scene, body: body.trim() }) }).catch(() => {})
-    setBody('')
+    await fetch('/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentId, studentName, lineId: line.id, lineIdTo: lineIdTo.trim() || null, act: line.act, scene: line.scene, body: body.trim() }) }).catch(() => {})
+    setBody(''); setLineIdTo('')
     const all = await fetch(`/api/notes?studentId=${studentId}`).then(r => r.json()).catch(() => [])
     setNotes(all.filter((n: any) => n.lineId === line.id))
     onSaved?.(line.id)
@@ -45,6 +47,11 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
           </div>
         )}
         <Textarea placeholder="Write your note…" value={body} onChange={e => setBody(e.target.value)} rows={4} className="font-serif resize-none mb-3" />
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs font-sans text-muted-foreground shrink-0">Lines {line?.id} —</span>
+          <Input placeholder={line?.id ?? ''} value={lineIdTo} onChange={e => setLineIdTo(e.target.value)} className="h-7 text-xs font-mono flex-1" />
+          <span className="text-xs font-sans text-muted-foreground shrink-0">(optional range)</span>
+        </div>
         <Button onClick={save} disabled={saving || !body.trim()} className="w-full">{saving ? 'Saving…' : 'Save note'}</Button>
         {notes.length > 0 && (
           <div className="mt-6 flex flex-col gap-3">
@@ -52,6 +59,7 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
             {notes.map(n => (
               <Card key={n.id} className="relative">
                 <CardContent className="pt-4 pb-3 pr-10">
+                  {n.lineIdTo && <p className="text-xs font-mono text-muted-foreground font-sans mb-1">{line?.id} — {n.lineIdTo}</p>}
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{n.body}</p>
                   <p className="text-xs text-muted-foreground mt-2 font-sans">{new Date(n.updatedAt).toLocaleString()}</p>
                 </CardContent>
