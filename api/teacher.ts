@@ -8,8 +8,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { key } = req.query
   if (key !== process.env.TEACHER_KEY) return res.status(403).json({ error: 'forbidden' })
   const rows = await sql`
-    SELECT n.id, s.student_name AS "studentName", n.line_id AS "lineId", n.act, n.scene, n.body, n.updated_at AS "updatedAt"
-    FROM notes n JOIN sessions s ON s.student_id = n.student_id
-    ORDER BY s.student_name, n.updated_at DESC`
+    SELECT n.id, s.student_name AS "studentName", s.join_code AS "joinCode",
+           c.label AS "classLabel", n.line_id AS "lineId", n.act, n.scene,
+           n.body, n.updated_at AS "updatedAt"
+    FROM notes n
+    JOIN sessions s ON s.student_id = n.student_id
+    JOIN classes c ON c.join_code = s.join_code
+    ORDER BY c.label, s.student_name, n.updated_at DESC`
   res.json(rows)
 }

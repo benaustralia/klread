@@ -3,11 +3,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-type Note = { id: string; studentName: string; lineId: string; body: string; updatedAt: string }
+type Note = { id: string; studentName: string; joinCode: string; classLabel: string; lineId: string; body: string; updatedAt: string }
 type Class = { joinCode: string; label: string; createdAt: string }
 
-export function TeacherView() {
-  const key = new URLSearchParams(location.search).get('key') ?? ''
+export function TeacherView({ teacherKey }: { teacherKey?: string }) {
+  const key = teacherKey ?? new URLSearchParams(location.search).get('key') ?? ''
   const [notes, setNotes] = useState<Note[] | null>(null)
   const [classes, setClasses] = useState<Class[]>([])
   const [label, setLabel] = useState('')
@@ -15,10 +15,11 @@ export function TeacherView() {
   const [err, setErr] = useState('')
 
   useEffect(() => {
-    fetch(`/api/teacher?key=${encodeURIComponent(key)}`)
+    const k = encodeURIComponent(key)
+    fetch(`/api/teacher?key=${k}`)
       .then(r => { if (r.status === 403) throw new Error('Invalid teacher key'); if (!r.ok) throw new Error('Failed to load'); return r.json() })
       .then(setNotes).catch(e => setErr(e.message))
-    fetch(`/api/classes?key=${encodeURIComponent(key)}`).then(r => r.json()).then(setClasses).catch(() => {})
+    fetch(`/api/classes?key=${k}`).then(r => r.json()).then((all: Class[]) => setClasses(all.filter(c => c.label !== 'Teacher'))).catch(() => {})
   }, [])
 
   async function createCode() {
@@ -37,7 +38,13 @@ export function TeacherView() {
   if (err) return <div className="flex items-center justify-center min-h-screen"><p className="text-destructive font-semibold">{err}</p></div>
   if (!notes) return <div className="flex items-center justify-center min-h-screen"><p className="text-muted-foreground">Loading…</p></div>
 
-  const byStudent = notes.reduce<Record<string, Note[]>>((acc, n) => { (acc[n.studentName] ??= []).push(n); return acc }, {})
+  // Group notes by class, then student
+  const byClass = notes.reduce<Record<string, { label: string; byStudent: Record<string, Note[]> }>>((acc, n) => {
+    const key = n.joinCode
+    if (!acc[key]) acc[key] = { label: n.classLabel, byStudent: {} }
+    ;(acc[key].byStudent[n.studentName] ??= []).push(n)
+    return acc
+  }, {})
 
   return (
     <div className="max-w-4xl mx-auto p-6 font-sans">
@@ -68,26 +75,34 @@ export function TeacherView() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold mb-1">Student notes</h2>
-        <p className="text-sm text-muted-foreground mb-6">{notes.length} notes</p>
-        {Object.entries(byStudent).map(([student, rows]) => (
-          <div key={student} className="mb-8">
-            <h3 className="text-base font-semibold mb-3 flex items-center gap-2">{student} <Badge>{rows.length}</Badge></h3>
-            <table className="w-full text-sm border-collapse">
-              <thead><tr className="border-b text-xs uppercase tracking-wider text-muted-foreground text-left"><th className="py-2 pr-4 w-20">Line</th><th className="py-2 pr-4">Note</th><th className="py-2 w-40">When</th></tr></thead>
-              <tbody>
-                {rows.map(n => (
-                  <tr key={n.id} className="border-b hover:bg-muted/50">
-                    <td className="py-2 pr-4 font-mono text-primary">{n.lineId}</td>
-                    <td className="py-2 pr-4 font-serif leading-relaxed">{n.body}</td>
-                    <td className="py-2 text-xs text-muted-foreground">{new Date(n.updatedAt).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <h2 className="text-lg font-semibold mb-6">Student notes</h2>
+        {!notes.length && <p className="text-muted-foreground">No notes yet.</p>}
+        {Object.entries(byClass).map(([code, { label, byStudent }]) => (
+          <div key={code} className="mb-10">
+            <h3 className="text-base font-bold mb-4 flex items-center gap-2 border-b pb-2">
+              <span className="font-mono text-primary">{code}</span>
+              <span>{label}</span>
+              <Badge>{Object.values(byStudent).flat().length}</Badge>
+            </h3>
+            {Object.entries(byStudent).map(([student, rows]) => (
+              <div key={student} className="mb-6 ml-2">
+                <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">{student} <Badge>{rows.length}</Badge></h4>
+                <table className="w-full text-sm border-collapse">
+                  <thead><tr className="border-b text-xs uppercase tracking-wider text-muted-foreground text-left"><th className="py-2 pr-4 w-20">Line</th><th className="py-2 pr-4">Note</th><th className="py-2 w-40">When</th></tr></thead>
+                  <tbody>
+                    {rows.map(n => (
+                      <tr key={n.id} className="border-b hover:bg-muted/50">
+                        <td className="py-2 pr-4 font-mono text-primary">{n.lineId}</td>
+                        <td className="py-2 pr-4 font-serif leading-relaxed">{n.body}</td>
+                        <td className="py-2 text-xs text-muted-foreground">{new Date(n.updatedAt).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
           </div>
         ))}
-        {!notes.length && <p className="text-muted-foreground">No notes yet.</p>}
       </section>
     </div>
   )

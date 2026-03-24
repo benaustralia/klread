@@ -8,7 +8,7 @@ import { TextReader } from './components/TextReader'
 import { TeacherView } from './components/TeacherView'
 import learData from './data/king-lear.json'
 
-type Session = { studentId: string; studentName: string; joinCode: string; initials: string }
+type Session = { studentId: string; studentName: string; joinCode: string; initials: string; isTeacher: boolean }
 const KEY = 'klread_session'
 const stored = (): Session | null => { try { return JSON.parse(localStorage.getItem(KEY) ?? 'null') } catch { return null } }
 
@@ -26,22 +26,20 @@ export default function App() {
     setLoading(true); setErr('')
     try {
       const check = await fetch(`/api/sessions?code=${encodeURIComponent(code.trim())}&name=${encodeURIComponent(name.trim())}`)
-      let studentId: string; let sessionInitials: string
+      let data: any
       if (check.ok) {
-        const data = await check.json()
-        studentId = data.studentId; sessionInitials = data.initials ?? ''
+        data = await check.json()
       } else {
         const res = await fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentName: name.trim(), joinCode: code.trim(), initials: initials.trim().slice(0, 4).toUpperCase() }) })
         if (!res.ok) { setErr('Could not join. Check your join code.'); return }
-        const data = await res.json()
-        studentId = data.studentId; sessionInitials = data.initials ?? ''
+        data = await res.json()
       }
-      const s: Session = { studentId, studentName: name.trim(), joinCode: code.trim(), initials: sessionInitials }
+      const s: Session = { studentId: data.studentId, studentName: name.trim(), joinCode: code.trim(), initials: data.initials ?? '', isTeacher: data.isTeacher ?? false }
       localStorage.setItem(KEY, JSON.stringify(s)); setSession(s)
     } catch { setErr('Network error') } finally { setLoading(false) }
   }
 
-  if (isTeacher) return <TeacherView />
+  if (isTeacher || session?.isTeacher) return <TeacherView teacherKey={session?.joinCode ?? new URLSearchParams(location.search).get('key') ?? ''} />
 
   return (
     <TooltipProvider>
