@@ -57,7 +57,7 @@ export default function App() {
     } catch { setErr('Network error') } finally { setLoading(false) }
   }
 
-  if (isTeacher || session?.isTeacher) return <TeacherView teacherKey={session?.joinCode ?? new URLSearchParams(location.search).get('key') ?? ''} />
+  if (isTeacher || session?.isTeacher) return <TeacherView teacherKey={session?.joinCode ?? new URLSearchParams(location.search).get('key') ?? ''} teacherStudentId={session?.studentId} teacherName={session?.studentName} teacherInitials={session?.initials} />
 
   return (
     <TooltipProvider>
