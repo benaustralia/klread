@@ -58,9 +58,15 @@ export default function App() {
         </DialogContent>
       </Dialog>
       <div className="min-h-screen bg-background">
-        <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between">
-          <h1 className="font-serif text-lg font-bold">King Lear</h1>
-          <label className="flex items-center gap-2 text-sm font-sans cursor-pointer">
+        <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between gap-4">
+          <h1 className="font-serif text-lg font-bold shrink-0">King Lear</h1>
+          {session && (
+            <span className="hidden sm:flex items-center gap-4 text-xs font-sans text-muted-foreground">
+              <span><span className="text-yellow-700 font-bold">[ ]</span> Folio 1623</span>
+              <span><span className="text-sky-600 font-bold">‹ ›</span> Quarto 1608</span>
+            </span>
+          )}
+          <label className="flex items-center gap-2 text-sm font-sans cursor-pointer shrink-0">
             <span className="text-muted-foreground">Apparatus</span>
             <Switch checked={showVariants} onCheckedChange={setShowVariants} />
           </label>
