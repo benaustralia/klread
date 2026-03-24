@@ -1,6 +1,7 @@
 """
 Merges stage directions from Folger TEI XML into king-lear.json.
-Each stage direction becomes a line object with type="stage".
+Positions stage directions by scene-relative line number (from line.id),
+not by absolute FTLN.
 """
 import json, re, xml.etree.ElementTree as ET
 
@@ -11,30 +12,33 @@ JSON_PATH = 'src/data/king-lear.json'
 tree = ET.parse(XML_PATH)
 root = tree.getroot()
 
-# Extract stage directions
 stages = []
 for el in root.findall('.//tei:stage', NS):
     n = el.get('n', '')
     m = re.match(r'[Ss][Dd]\s+(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?', n)
     if not m:
         continue
-    act, scene, ftln = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    act, scene, linenum = int(m.group(1)), int(m.group(2)), int(m.group(3))
     sub = int(m.group(4)) if m.group(4) else 0
     text = ' '.join(''.join(el.itertext()).split()).strip().lstrip(',').strip()
     if not text:
         continue
     stages.append({
-        'act': act, 'scene': scene, 'ftln': ftln, 'sub': sub,
+        'act': act, 'scene': scene, 'linenum': linenum, 'sub': sub,
         'stageType': el.get('type', ''),
         'inline': el.get('rend', '') == 'inline',
         'text': text,
     })
 
-# Sort within each scene by (ftln, sub)
-stages.sort(key=lambda s: (s['act'], s['scene'], s['ftln'], s['sub']))
+stages.sort(key=lambda s: (s['act'], s['scene'], s['linenum'], s['sub']))
 
 with open(JSON_PATH) as f:
     data = json.load(f)
+
+# Strip any previously inserted stage directions
+for act in data['acts']:
+    for scene in act['scenes']:
+        scene['lines'] = [l for l in scene['lines'] if l.get('type') != 'stage']
 
 total = 0
 for act_data in data['acts']:
@@ -48,9 +52,9 @@ for act_data in data['acts']:
         lines = scene_data['lines']
         new_lines = []
 
-        # Insert stage directions with ftln=0 at start
+        # linenum=0 → before first line
         for sd in sds:
-            if sd['ftln'] == 0:
+            if sd['linenum'] == 0:
                 new_lines.append({
                     'id': f"sd-{a}.{s}.0.{sd['sub']}.{sd['stageType'][:3]}",
                     'type': 'stage', 'stageType': sd['stageType'],
@@ -58,30 +62,37 @@ for act_data in data['acts']:
                 })
                 total += 1
 
-        # Walk lines, appending stage directions after their matching ftln
-        sds_remaining = [sd for sd in sds if sd['ftln'] != 0]
+        sds_remaining = [sd for sd in sds if sd['linenum'] != 0]
+
         for line in lines:
             new_lines.append(line)
-            lftln = line.get('ftln', -1)
-            to_insert = [sd for sd in sds_remaining if sd['ftln'] == lftln]
+            # Scene-relative line number is the last component of the id e.g. "3.4.47" → 47
+            try:
+                lnum = int(line['id'].split('.')[-1])
+            except (KeyError, ValueError):
+                lnum = -1
+            to_insert = [sd for sd in sds_remaining if sd['linenum'] == lnum]
             for sd in to_insert:
                 new_lines.append({
-                    'id': f"sd-{a}.{s}.{sd['ftln']}.{sd['sub']}.{sd['stageType'][:3]}",
+                    'id': f"sd-{a}.{s}.{sd['linenum']}.{sd['sub']}.{sd['stageType'][:3]}",
                     'type': 'stage', 'stageType': sd['stageType'],
                     'inline': sd['inline'], 'act': a, 'scene': s, 'text': sd['text'],
                 })
                 total += 1
-            sds_remaining = [sd for sd in sds_remaining if sd['ftln'] != lftln]
+            sds_remaining = [sd for sd in sds_remaining if sd['linenum'] != lnum]
 
-        # Any remaining stage directions (ftln doesn't match any line exactly)
-        # insert after the last line with ftln <= sd.ftln
+        # Any unmatched: insert after last line with linenum <= sd.linenum
         for sd in sds_remaining:
             insert_at = len(new_lines)
-            for i, line in enumerate(new_lines):
-                if line.get('ftln', -1) <= sd['ftln']:
-                    insert_at = i + 1
+            for i, ln in enumerate(new_lines):
+                try:
+                    lnum = int(ln['id'].split('.')[-1])
+                    if lnum <= sd['linenum']:
+                        insert_at = i + 1
+                except (KeyError, ValueError, IndexError):
+                    pass
             new_lines.insert(insert_at, {
-                'id': f"sd-{a}.{s}.{sd['ftln']}.{sd['sub']}.{sd['stageType'][:3]}",
+                'id': f"sd-{a}.{s}.{sd['linenum']}.{sd['sub']}.{sd['stageType'][:3]}",
                 'type': 'stage', 'stageType': sd['stageType'],
                 'inline': sd['inline'], 'act': a, 'scene': s, 'text': sd['text'],
             })
