@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -122,7 +122,6 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
           {classes.map(c => {
             const students = allStudents.filter((s: any) => s.joinCode === c.joinCode)
             const notes = allNotes.filter((n: any) => n.joinCode === c.joinCode)
-            const byStudent = notes.reduce<Record<string, Note[]>>((acc, n) => { (acc[n.studentName] ??= []).push(n); return acc }, {})
             return (
               <AccordionItem key={c.joinCode} value={c.joinCode}>
                 <AccordionTrigger className="hover:no-underline">
