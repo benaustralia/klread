@@ -61,14 +61,14 @@ export default function App() {
         <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between gap-4">
           <h1 className="font-serif text-lg font-bold shrink-0">King Lear</h1>
           {session && (
-            <span className="flex items-center gap-4 text-xs font-sans">
-              <span className="text-sky-600 font-bold">‹ › Quarto 1608</span>
-              <span className="text-yellow-700 font-bold">[ ] Folio 1623</span>
+            <span className="flex items-center gap-3 text-xs font-sans font-semibold">
+              <span className="bg-sky-200 border-l-2 border-sky-400 px-2 py-0.5 text-black">‹ › Quarto 1608</span>
+              <span className="bg-yellow-200 border-l-2 border-yellow-400 px-2 py-0.5 text-black">[ ] Folio 1623</span>
             </span>
           )}
           <div className="flex items-center gap-3 shrink-0">
             <label className="flex items-center gap-2 text-sm font-sans cursor-pointer">
-              <span className="text-muted-foreground">Apparatus</span>
+              <span className="text-muted-foreground">Highlight</span>
               <Switch checked={showVariants} onCheckedChange={setShowVariants} />
             </label>
             {session && (
