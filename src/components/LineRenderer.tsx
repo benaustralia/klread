@@ -12,8 +12,24 @@ function BracketTip({ children, label }: { children: React.ReactNode; label: str
   )
 }
 
-export function LineRenderer({ line, showVariants, initials, onClick }: { line: Line; showVariants: boolean; initials?: string; onClick: (l: Line) => void }) {
+export type NotePosition = 'solo' | 'start' | 'mid' | 'end'
+
+export function LineRenderer({ line, showVariants, initials, notePosition, onClick }: { line: Line; showVariants: boolean; initials?: string; notePosition?: NotePosition; onClick: (l: Line) => void }) {
   const highlight = !showVariants ? '' : line.textb ? 'bg-yellow-200 border-l-2 border-yellow-400 pl-1' : line.texta ? 'bg-sky-200 border-l-2 border-sky-400 pl-1' : ''
+
+  let badge: React.ReactNode = null
+  if (initials && notePosition) {
+    if (notePosition === 'solo') {
+      badge = <span className="text-xs font-semibold text-primary border border-border rounded px-1 shrink-0">{initials}</span>
+    } else if (notePosition === 'start') {
+      badge = <span className="text-xs font-semibold text-primary border border-b-0 border-border rounded-t px-1 shrink-0">{initials}</span>
+    } else if (notePosition === 'mid') {
+      badge = <span className="text-xs font-semibold text-primary/30 border-x border-border px-1 shrink-0 select-none">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    } else if (notePosition === 'end') {
+      badge = <span className="text-xs font-semibold text-primary/30 border-x border-b border-border rounded-b px-1 shrink-0 select-none">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    }
+  }
+
   return (
     <div className={`flex gap-3 items-baseline cursor-pointer hover:bg-black/5 px-2 py-0.5 rounded transition-colors ${highlight}`} onClick={() => onClick(line)}>
       <span className="text-xs text-gray-400 select-none w-16 shrink-0 text-right font-mono">{line.id}</span>
@@ -24,7 +40,7 @@ export function LineRenderer({ line, showVariants, initials, onClick }: { line: 
         {line.texta && <span className="inline align-baseline text-sky-600 ml-0.5"><TextARight /></span>}
         {line.textb && <span className="inline align-baseline text-yellow-700 ml-0.5"><TextBRight /></span>}
       </span>
-      {initials && <span className="text-xs font-semibold text-primary border border-border rounded px-1 shrink-0">{initials}</span>}
+      {badge}
     </div>
   )
 }

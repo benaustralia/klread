@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,7 +12,7 @@ import { Progress } from '@/components/ui/progress'
 import { TeacherView } from './components/TeacherView'
 import learData from './data/king-lear.json'
 
-type Session = { studentId: string; studentName: string; joinCode: string; initials: string; isTeacher: boolean }
+type Session = { studentId: string; studentName: string; joinCode: string; initials: string; isTeacher: boolean; bookmarkLineId?: string }
 const KEY = 'klread_session'
 const LAST_KEY = 'klread_last'
 const stored = (): Session | null => { try { return JSON.parse(localStorage.getItem(KEY) ?? 'null') } catch { return null } }
@@ -29,6 +29,7 @@ export default function App() {
   const [actNum, setActNum] = useState(1)
   const [sceneNum, setSceneNum] = useState(1)
   const [scrollProgress, setScrollProgress] = useState(0)
+  const [scrollToLineId, setScrollToLineId] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     const onScroll = () => {
@@ -45,6 +46,24 @@ export default function App() {
   const [isNew, setIsNew] = useState(false)
   const [loading, setLoading] = useState(false); const [err, setErr] = useState('')
 
+  function applyBookmark(lineId: string) {
+    const parts = lineId.split('.')
+    if (parts.length >= 2) {
+      const a = parseInt(parts[0]), s = parseInt(parts[1])
+      if (!isNaN(a) && !isNaN(s)) { setActNum(a); setSceneNum(s) }
+    }
+    setScrollToLineId(lineId)
+  }
+
+  const saveBookmarkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const saveBookmark = useCallback((lineId: string) => {
+    if (!session) return
+    if (saveBookmarkTimer.current) clearTimeout(saveBookmarkTimer.current)
+    saveBookmarkTimer.current = setTimeout(() => {
+      fetch('/api/sessions', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ studentId: session.studentId, bookmarkLineId: lineId }) }).catch(() => {})
+    }, 2000)
+  }, [session])
+
   // Refresh session on mount to pick up server-side changes (e.g. isTeacher flag)
   useEffect(() => {
     if (!session) return
@@ -52,9 +71,10 @@ export default function App() {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return
-        const updated: Session = { ...session, isTeacher: data.isTeacher ?? false }
+        const updated: Session = { ...session, isTeacher: data.isTeacher ?? false, bookmarkLineId: data.bookmarkLineId ?? session.bookmarkLineId }
         localStorage.setItem(KEY, JSON.stringify(updated))
         setSession(updated)
+        if (data.bookmarkLineId) applyBookmark(data.bookmarkLineId)
       }).catch(() => {})
   }, [])
 
@@ -72,10 +92,11 @@ export default function App() {
         if (!res.ok) { setErr('Could not join. Check your join code.'); return }
         data = await res.json()
       }
-      const s: Session = { studentId: data.studentId, studentName: name.trim(), joinCode: code.trim(), initials: data.initials ?? '', isTeacher: data.isTeacher ?? false }
+      const s: Session = { studentId: data.studentId, studentName: name.trim(), joinCode: code.trim(), initials: data.initials ?? '', isTeacher: data.isTeacher ?? false, bookmarkLineId: data.bookmarkLineId }
       localStorage.setItem(KEY, JSON.stringify(s))
       localStorage.setItem(LAST_KEY, JSON.stringify({ name: name.trim(), code: code.trim() }))
       setSession(s)
+      if (data.bookmarkLineId) applyBookmark(data.bookmarkLineId)
     } catch { setErr('Network error') } finally { setLoading(false) }
   }
 
@@ -119,7 +140,7 @@ export default function App() {
         </div>
         <main className="px-2 py-4 sm:px-6">
           {session ? (
-            <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={session.studentId} studentName={session.studentName} initials={session.initials} actNum={actNum} sceneNum={sceneNum} />
+            <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={session.studentId} studentName={session.studentName} initials={session.initials} actNum={actNum} sceneNum={sceneNum} onBookmark={saveBookmark} scrollToLineId={scrollToLineId} />
           ) : (
             <div className="flex items-center justify-center py-16">
               <Card className="w-full max-w-lg">
