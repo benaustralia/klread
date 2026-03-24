@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { TextReader } from './TextReader'
 import learData from '../data/king-lear.json'
 
@@ -67,7 +68,7 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   )
 
   if (reading) return (
-    <div className="min-h-screen bg-background">
+    <TooltipProvider><div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center gap-4">
         <Button variant="neutral" size="sm" onClick={() => setReading(null)}>← Back</Button>
         <span className="font-sans font-semibold text-sm">{reading.label}</span>
@@ -79,7 +80,7 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
       <main className="px-2 py-4 sm:px-6">
         <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={teacherStudentId ?? ''} studentName={teacherName ?? ''} initials={teacherInitials ?? ''} />
       </main>
-    </div>
+    </div></TooltipProvider>
   )
 
   return (
