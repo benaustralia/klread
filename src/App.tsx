@@ -113,7 +113,7 @@ export default function App() {
         {session && (
           <div className="border-b py-2 flex flex-col items-center gap-2">
             <SceneNav acts={learData.acts as any} actNum={actNum} sceneNum={sceneNum} onGoTo={(a, s) => { setActNum(a); setSceneNum(s) }} />
-            <Progress value={scrollProgress} className="w-full rounded-none border-0 h-1" />
+            <Progress value={scrollProgress} className="w-full max-w-2xl h-1" />
           </div>
         )}
         </div>
