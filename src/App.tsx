@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Switch } from '@/components/ui/switch'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -18,6 +18,19 @@ export default function App() {
   const [showVariants, setShowVariants] = useState(false)
   const [name, setName] = useState(''); const [code, setCode] = useState(''); const [initials, setInitials] = useState('')
   const [loading, setLoading] = useState(false); const [err, setErr] = useState('')
+
+  // Refresh session on mount to pick up server-side changes (e.g. isTeacher flag)
+  useEffect(() => {
+    if (!session) return
+    fetch(`/api/sessions?code=${encodeURIComponent(session.joinCode)}&name=${encodeURIComponent(session.studentName)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return
+        const updated: Session = { ...session, isTeacher: data.isTeacher ?? false }
+        localStorage.setItem(KEY, JSON.stringify(updated))
+        setSession(updated)
+      }).catch(() => {})
+  }, [])
 
   const dialogOpen = !session && !isTeacher
 
