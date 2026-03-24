@@ -95,13 +95,15 @@ export default function App() {
             <TextReader acts={learData.acts as any} showVariants={showVariants} studentId={session.studentId} studentName={session.studentName} initials={session.initials} />
           ) : (
             <div className="flex items-center justify-center py-16">
-              <Card className="w-full max-w-sm">
+              <Card className="w-full max-w-lg">
                 <CardHeader>
                   <CardTitle>Mark it, nuncle.</CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-6">
-                  <Input id="login-name" placeholder="your first name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
-                  <Input id="login-code" placeholder="class code" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} />
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Input id="login-name" placeholder="your first name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && join()} />
+                    <Input id="login-code" placeholder="class code" value={code} onChange={e => setCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && join()} />
+                  </div>
                   {isNew && (
                     <div className="grid gap-3">
                       <Label htmlFor="login-initials">Initials</Label>
