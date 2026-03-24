@@ -20,13 +20,13 @@ export function LineRenderer({ line, showVariants, initials, notePosition, onCli
   let badge: React.ReactNode = null
   if (initials && notePosition) {
     if (notePosition === 'solo') {
-      badge = <span className="text-xs font-semibold text-primary border border-border rounded px-1 shrink-0">{initials}</span>
+      badge = <span className="text-xs font-semibold text-primary border border-border rounded px-1 shrink-0 self-center">{initials}</span>
     } else if (notePosition === 'start') {
-      badge = <span className="text-xs font-semibold text-primary border border-b-0 border-border rounded-t px-1 shrink-0">{initials}</span>
+      badge = <span className="text-xs font-semibold text-primary border border-b-0 border-border rounded-t px-1 shrink-0 self-stretch flex items-center">{initials}</span>
     } else if (notePosition === 'mid') {
-      badge = <span className="text-xs font-semibold text-transparent border-x border-border px-1 shrink-0 select-none">{initials}</span>
+      badge = <span className="text-xs font-semibold text-transparent border-x border-border px-1 shrink-0 select-none self-stretch">{initials}</span>
     } else if (notePosition === 'end') {
-      badge = <span className="text-xs font-semibold text-transparent border-x border-b border-border rounded-b px-1 shrink-0 select-none">{initials}</span>
+      badge = <span className="text-xs font-semibold text-transparent border-x border-b border-border rounded-b px-1 shrink-0 select-none self-stretch">{initials}</span>
     }
   }
 
