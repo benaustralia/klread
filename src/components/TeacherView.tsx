@@ -54,7 +54,10 @@ export function TeacherView({ teacherKey }: { teacherKey?: string }) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 font-sans">
-      <h1 className="text-2xl font-bold mb-6">Teacher view</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Teacher view</h1>
+        <Button variant="neutral" size="sm" onClick={() => { localStorage.removeItem('klread_session'); location.href = '/' }}>Log out</Button>
+      </div>
 
       <section className="mb-10">
         <h2 className="text-lg font-semibold mb-3">Class codes</h2>
