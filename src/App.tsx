@@ -63,7 +63,7 @@ export default function App() {
     <TooltipProvider>
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-10 bg-background border-b px-4 py-3 flex items-center justify-between gap-4">
-          <h1 className="text-lg font-bold shrink-0">King Lear</h1>
+          <h1 className="text-lg font-bold shrink-0">King Lear Reader</h1>
           {session && (
             <span className="flex items-center gap-3 text-xs font-semibold">
               <span className="apparatus-quarto">‹ › Quarto 1608</span>
