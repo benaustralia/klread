@@ -1,6 +1,6 @@
 export function BrokenCrown({ className }: { className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" className={className} aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="150 210 670 625" className={className} aria-hidden="true">
       <defs>
         <linearGradient id="bc-a" x1="720.766" x2="561.995" y1="696.705" y2="567.665" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#ffcc58"/><stop offset="1" stopColor="#ffea95"/>
