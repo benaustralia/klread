@@ -80,8 +80,6 @@
   --font-weight-base: var(--base-font-weight);
   --font-weight-heading: var(--heading-font-weight);
 
-  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: system-ui, 'Segoe UI', Roboto, sans-serif;
 }
 
 #root {
@@ -91,10 +89,15 @@
 @layer base {
   * { @apply border-border outline-ring/50; }
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-base;
+    font-family: 'DM Sans', sans-serif;
     margin: 0;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+    font-family: 'DM Sans', sans-serif;
   }
 }
 
