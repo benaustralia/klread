@@ -15,17 +15,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.json(rows)
   }
   if (req.method === 'POST') {
-    const { label } = req.body ?? {}
+    const { label, code: customCode } = req.body ?? {}
     if (!label?.trim()) return res.status(400).json({ error: 'label required' })
-    let code = genCode()
-    // Retry on collision (extremely unlikely)
+    const code = customCode?.trim() || genCode()
     try {
-      const rows = await sql`INSERT INTO classes (join_code, label) VALUES (${code}, ${label.trim()}) RETURNING join_code AS "joinCode", label`
+      const rows = await sql`INSERT INTO classes (join_code, label) VALUES (${code}, ${label.trim()}) RETURNING join_code AS "joinCode", label, created_at AS "createdAt"`
       return res.json(rows[0])
     } catch {
-      code = genCode()
-      const rows = await sql`INSERT INTO classes (join_code, label) VALUES (${code}, ${label.trim()}) RETURNING join_code AS "joinCode", label`
-      return res.json(rows[0])
+      return res.status(409).json({ error: 'Code already in use' })
     }
   }
   if (req.method === 'DELETE') {

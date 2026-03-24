@@ -11,6 +11,7 @@ export function TeacherView({ teacherKey }: { teacherKey?: string }) {
   const [notes, setNotes] = useState<Note[] | null>(null)
   const [classes, setClasses] = useState<Class[]>([])
   const [label, setLabel] = useState('')
+  const [codeInput, setCodeInput] = useState('')
   const [creating, setCreating] = useState(false)
   const [err, setErr] = useState('')
 
@@ -25,8 +26,8 @@ export function TeacherView({ teacherKey }: { teacherKey?: string }) {
   async function createCode() {
     if (!label.trim()) return
     setCreating(true)
-    const r = await fetch(`/api/classes?key=${encodeURIComponent(key)}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ label: label.trim() }) })
-    if (r.ok) { const c = await r.json(); setClasses(p => [c, ...p]); setLabel('') }
+    const r = await fetch(`/api/classes?key=${encodeURIComponent(key)}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ label: label.trim(), code: codeInput.trim().toUpperCase() || undefined }) })
+    if (r.ok) { const c = await r.json(); setClasses(p => [c, ...p]); setLabel(''); setCodeInput('') }
     setCreating(false)
   }
 
@@ -57,9 +58,10 @@ export function TeacherView({ teacherKey }: { teacherKey?: string }) {
 
       <section className="mb-10">
         <h2 className="text-lg font-semibold mb-3">Class codes</h2>
-        <div className="flex gap-2 mb-4">
-          <Input placeholder="Class label (e.g. Year 11B)" value={label} onChange={e => setLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && createCode()} className="max-w-xs" />
-          <Button onClick={createCode} disabled={creating || !label.trim()}>{creating ? 'Creating…' : 'Generate code'}</Button>
+        <div className="flex gap-2 mb-4 flex-wrap">
+          <Input placeholder="Label (e.g. Year 11B)" value={label} onChange={e => setLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && createCode()} className="max-w-xs" />
+          <Input placeholder="Code (e.g. ENG11B) — optional" value={codeInput} onChange={e => setCodeInput(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && createCode()} className="max-w-xs uppercase" />
+          <Button onClick={createCode} disabled={creating || !label.trim()}>{creating ? 'Creating…' : 'Create'}</Button>
         </div>
         {classes.length > 0 && (
           <table className="w-full text-sm border-collapse">
