@@ -11,7 +11,9 @@ import learData from './data/king-lear.json'
 
 type Session = { studentId: string; studentName: string; joinCode: string; initials: string; isTeacher: boolean }
 const KEY = 'klread_session'
+const LAST_KEY = 'klread_last'
 const stored = (): Session | null => { try { return JSON.parse(localStorage.getItem(KEY) ?? 'null') } catch { return null } }
+const lastUsed = (): { name: string; code: string } | null => { try { return JSON.parse(localStorage.getItem(LAST_KEY) ?? 'null') } catch { return null } }
 
 export default function App() {
   // ?logout in URL always clears session — escape hatch if ever stuck
@@ -21,7 +23,9 @@ export default function App() {
   const isTeacher = location.pathname === '/teacher'
   const [session, setSession] = useState<Session | null>(stored)
   const [showVariants, setShowVariants] = useState(true)
-  const [name, setName] = useState(''); const [code, setCode] = useState(''); const [initials, setInitials] = useState('')
+  const [name, setName] = useState(() => lastUsed()?.name ?? '')
+  const [code, setCode] = useState(() => lastUsed()?.code ?? '')
+  const [initials, setInitials] = useState('')
   const [isNew, setIsNew] = useState(false)
   const [loading, setLoading] = useState(false); const [err, setErr] = useState('')
 
@@ -53,7 +57,9 @@ export default function App() {
         data = await res.json()
       }
       const s: Session = { studentId: data.studentId, studentName: name.trim(), joinCode: code.trim(), initials: data.initials ?? '', isTeacher: data.isTeacher ?? false }
-      localStorage.setItem(KEY, JSON.stringify(s)); setSession(s)
+      localStorage.setItem(KEY, JSON.stringify(s))
+      localStorage.setItem(LAST_KEY, JSON.stringify({ name: name.trim(), code: code.trim() }))
+      setSession(s)
     } catch { setErr('Network error') } finally { setLoading(false) }
   }
 
