@@ -39,7 +39,7 @@ export default function App() {
   const dialogOpen = !session && !isTeacher
 
   async function join() {
-    if (!name.trim() || !code.trim()) return setErr('Enter your name and join code')
+    if (!name.trim() || !initials.trim() || !code.trim()) return setErr('All fields are required')
     setLoading(true); setErr('')
     try {
       const check = await fetch(`/api/sessions?code=${encodeURIComponent(code.trim())}&name=${encodeURIComponent(name.trim())}`)
