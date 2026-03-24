@@ -113,8 +113,8 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
       <section className="mb-8">
         <h2 className="text-lg font-semibold mb-3">Class codes</h2>
         <div className="flex gap-2 mb-4 flex-wrap">
-          <Input placeholder="Label e.g. Year 11B" value={label} onChange={e => setLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && createCode()} className="max-w-xs" />
-          <Input placeholder="Code e.g. ENG11B" value={codeInput} onChange={e => setCodeInput(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && createCode()} className="max-w-xs uppercase" />
+          <Input placeholder="Label e.g. Year 11B" value={label} onChange={e => setLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && createCode()} className="w-48 shrink-0" />
+          <Input placeholder="Code e.g. ENG11B" value={codeInput} onChange={e => setCodeInput(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && createCode()} className="w-32 shrink-0 uppercase" />
           <Button onClick={createCode} disabled={creating || !label.trim()}>{creating ? 'Creating…' : 'Create'}</Button>
         </div>
         {!classes.length && <p className="text-sm text-muted-foreground">No class codes yet.</p>}
@@ -138,8 +138,8 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
                     <button onClick={() => deleteCode(c.joinCode)} className="ml-auto text-xs text-muted-foreground hover:text-destructive">Delete code</button>
                   </div>
                   <div className="flex gap-2 mb-3 flex-wrap">
-                    <Input placeholder="Student name" value={newStudent[c.joinCode]?.name ?? ''} onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], name: e.target.value } }))} className="w-40" />
-                    <Input placeholder="Initials" value={newStudent[c.joinCode]?.initials ?? ''} onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], initials: e.target.value.toUpperCase().slice(0, 4) } }))} onKeyDown={e => e.key === 'Enter' && addStudent(c.joinCode)} className="w-24 uppercase" maxLength={4} />
+                    <Input placeholder="Student name" value={newStudent[c.joinCode]?.name ?? ''} onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], name: e.target.value } }))} className="w-40 shrink-0" />
+                    <Input placeholder="Initials" value={newStudent[c.joinCode]?.initials ?? ''} onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], initials: e.target.value.toUpperCase().slice(0, 4) } }))} onKeyDown={e => e.key === 'Enter' && addStudent(c.joinCode)} className="w-20 shrink-0 uppercase" maxLength={4} />
                     <Button size="sm" onClick={() => addStudent(c.joinCode)} disabled={addingStudent[c.joinCode]}>{addingStudent[c.joinCode] ? 'Adding…' : 'Add student'}</Button>
                   </div>
                   <DataTable columns={studentColumns} data={students} pageSize={10} />
