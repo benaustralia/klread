@@ -19,7 +19,7 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
 
   useEffect(() => {
     if (!open || !line || !studentId) return
-    setBody(''); setLineIdTo('')
+    setBody(''); setLineIdTo(line.id)
     fetch(`/api/notes?studentId=${studentId}`)
       .then(r => r.json())
       .then((all: Note[]) => setNotes(all.filter((n: any) => n.lineId === line.id)))
@@ -32,7 +32,7 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
     await fetch('/api/notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId, studentName, lineId: line.id, lineIdTo: lineIdTo.trim() || null, act: line.act, scene: line.scene, body: body.trim() })
+      body: JSON.stringify({ studentId, studentName, lineId: line.id, lineIdTo: lineIdTo.trim() && lineIdTo.trim() !== line.id ? lineIdTo.trim() : null, act: line.act, scene: line.scene, body: body.trim() })
     }).catch(() => {})
     setBody(''); setLineIdTo('')
     const all = await fetch(`/api/notes?studentId=${studentId}`).then(r => r.json()).catch(() => [])
@@ -63,9 +63,14 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
             <Textarea id="note-body" placeholder="Write your note…" value={body} onChange={e => setBody(e.target.value)} rows={5} className="resize-none" />
           </div>
 
-          <div className="grid gap-3">
-            <Label htmlFor="note-range">To line <span className="font-normal text-muted-foreground">(optional)</span></Label>
-            <Input id="note-range" placeholder={line?.id ?? '1.1.1'} value={lineIdTo} onChange={e => setLineIdTo(e.target.value)} className="font-mono" />
+          <div className="grid gap-2">
+            <Label>Lines</Label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground shrink-0">From</span>
+              <Input value={line?.id ?? ''} readOnly className="font-mono w-24 shrink-0 bg-muted" />
+              <span className="text-sm text-muted-foreground shrink-0">to</span>
+              <Input id="note-range" value={lineIdTo} onChange={e => setLineIdTo(e.target.value)} className="font-mono w-24 shrink-0" />
+            </div>
           </div>
 
           {notes.length > 0 && (
