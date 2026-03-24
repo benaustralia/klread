@@ -14,6 +14,9 @@ root = tree.getroot()
 
 stages = []
 for el in root.findall('.//tei:stage', NS):
+    # Skip parent stage elements that contain child stage elements (they duplicate their children)
+    if el.find('tei:stage', NS) is not None:
+        continue
     n = el.get('n', '')
     m = re.match(r'[Ss][Dd]\s+(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?', n)
     if not m:

@@ -35025,15 +35025,6 @@
           "num": 2,
           "lines": [
             {
-              "id": "sd-5.2.0.0.mix",
-              "type": "stage",
-              "stageType": "mixed",
-              "inline": false,
-              "act": 5,
-              "scene": 2,
-              "text": "Alarum within . Enter , with Drum and Colors , Lear , Cordelia , and Soldiers , over the stage , and exit . Enter Edgar and Gloucester ."
-            },
-            {
               "id": "sd-5.2.0.0.bus",
               "type": "stage",
               "stageType": "business",
