@@ -11,6 +11,7 @@ const SHORT: Record<string, string> = {
   "King Lear's palace": "Lear's palace",
   "The Earl of Gloucester's castle": "Gloucester's castle",
   "The Duke of Albany's palace": "Albany's palace",
+  "A hall in The Duke of Albany's palace": "A hall in Albany's palace",
   "Before the Duke of Albany's palace": "Albany's palace",
   "Before the Earl of Gloucester's castle": "Gloucester's castle",
   "The open country": "Open country",
