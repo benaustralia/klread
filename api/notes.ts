@@ -5,6 +5,18 @@ const sql = neon(process.env.DATABASE_URL!)
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
+    // Public endpoint: all teacher notes (universally visible)
+    if (req.query.teacherNotes) {
+      const rows = await sql`
+        SELECT n.id, n.line_id AS "lineId", n.line_id_to AS "lineIdTo",
+               n.body, n.act, n.scene, s.initials, s.student_name AS "studentName"
+        FROM notes n
+        JOIN sessions s ON s.student_id = n.student_id
+        JOIN classes c ON c.join_code = s.join_code
+        WHERE c.is_teacher = true
+        ORDER BY n.updated_at DESC`
+      return res.json(rows)
+    }
     const { studentId } = req.query
     if (!studentId) return res.status(400).json({ error: 'studentId required' })
     const rows = await sql`SELECT id, student_id AS "studentId", student_name AS "studentName", line_id AS "lineId", line_id_to AS "lineIdTo", act, scene, body, updated_at AS "updatedAt" FROM notes WHERE student_id = ${studentId as string} ORDER BY updated_at DESC`

@@ -204,6 +204,13 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
           })}
         </Accordion>
       </section>
+
+      {allNotes.filter((n: any) => !classes.some(c => c.joinCode === n.joinCode)).length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold mb-3">Your notes</h2>
+          <DataTable columns={noteColumns} data={allNotes.filter((n: any) => !classes.some(c => c.joinCode === n.joinCode))} pageSize={20} />
+        </section>
+      )}
     </div>
   )
 }

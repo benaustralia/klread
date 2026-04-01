@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import type { Line } from './LineRenderer'
 
 type Note = { id: string; body: string; lineIdTo?: string; updatedAt: string }
+type TeacherNote = { id: string; lineId: string; body: string; initials: string; studentName: string; updatedAt?: string }
 
 export function NotesSheet({ line, open, onOpenChange, studentId, studentName, onSaved }: {
   line: Line | null; open: boolean; onOpenChange: (v: boolean) => void
@@ -15,6 +16,7 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
   const [body, setBody] = useState('')
   const [lineIdTo, setLineIdTo] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
+  const [teacherNotes, setTeacherNotes] = useState<TeacherNote[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -23,6 +25,10 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
     fetch(`/api/notes?studentId=${studentId}`)
       .then(r => r.json())
       .then((all: Note[]) => setNotes(all.filter((n: any) => n.lineId === line.id)))
+      .catch(() => {})
+    fetch('/api/notes?teacherNotes=1')
+      .then(r => r.json())
+      .then((all: TeacherNote[]) => setTeacherNotes(all.filter(n => n.lineId === line.id)))
       .catch(() => {})
   }, [open, line?.id])
 
@@ -72,6 +78,18 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
               <Input id="note-range" value={lineIdTo} onChange={e => setLineIdTo(e.target.value)} className="font-mono w-24 shrink-0" />
             </div>
           </div>
+
+          {teacherNotes.length > 0 && (
+            <div className="grid gap-3">
+              <Label>Teacher note</Label>
+              {teacherNotes.map(n => (
+                <div key={n.id} className="border-2 border-border rounded-base bg-secondary-background p-3">
+                  <p className="text-xs font-mono text-muted-foreground mb-1">{n.initials} · {n.studentName}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{n.body}</p>
+                </div>
+              ))}
+            </div>
+          )}
 
           {notes.length > 0 && (
             <div className="grid gap-3">
