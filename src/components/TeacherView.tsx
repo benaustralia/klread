@@ -164,7 +164,7 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
                 <AccordionTrigger className="hover:no-underline">
                   <span className="flex items-center gap-3 text-left">
                     <span className="font-medium">{c.label}</span>
-                    <Badge>{students.length} students</Badge>
+
                     <span className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                       <span className="font-mono font-bold text-primary text-sm">{c.joinCode}</span>
                       <button
