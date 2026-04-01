@@ -67,8 +67,7 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
     setNotes(p => p.filter(n => n.id !== id))
   }
 
-  const rangeEnd = teacherNotes.find(n => n.lineIdTo && n.lineIdTo !== line?.id)?.lineIdTo
-    ?? notes.find(n => n.lineIdTo && n.lineIdTo !== line?.id)?.lineIdTo
+  const rangeEnd = notes.find(n => n.lineIdTo && n.lineIdTo !== line?.id)?.lineIdTo
   const rangeLines = (() => {
     if (!line) return []
     const from = allLines.findIndex(l => l.id === line.id)
@@ -122,7 +121,10 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
               <Label>Teacher note</Label>
               {teacherNotes.map(n => (
                 <div key={n.id} className="border-2 border-border rounded-base bg-secondary-background p-3">
-                  <p className="text-xs font-mono text-muted-foreground mb-1">{n.initials} · {n.studentName}</p>
+                  <p className="text-xs font-mono text-muted-foreground mb-1">
+                    {n.initials} · {n.studentName}
+                    {n.lineIdTo && n.lineIdTo !== line?.id && ` · ${n.lineId} – ${n.lineIdTo}`}
+                  </p>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{n.body}</p>
                 </div>
               ))}
