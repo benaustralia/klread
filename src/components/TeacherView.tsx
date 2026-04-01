@@ -155,7 +155,7 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
           <Button onClick={createCode} disabled={creating || !label.trim()}>{creating ? 'Creating…' : 'Create'}</Button>
         </div>
         {!classes.length && <p className="text-sm text-muted-foreground">No class codes yet.</p>}
-        <Accordion type="multiple">
+        <Accordion type="multiple" defaultValue={classes[0] ? [classes[0].joinCode] : []}>
           {classes.map(c => {
             const students = allStudents.filter((s: any) => s.joinCode === c.joinCode)
             const notes = allNotes.filter((n: any) => n.joinCode === c.joinCode)
