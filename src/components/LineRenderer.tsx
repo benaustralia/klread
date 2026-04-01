@@ -28,17 +28,17 @@ function makeBadge(initials: string, pos: NotePosition, primary: boolean, onClic
     </span>
   )
   if (pos === 'start') return (
-    <span data-badge className={`${base} ${clickable} border rounded px-1 shrink-0 self-stretch flex items-center`} onClick={handle}>
+    <span data-badge className={`${base} ${clickable} border border-b-0 rounded-t px-1 shrink-0 self-stretch flex items-center`} onClick={handle}>
       {initials}
     </span>
   )
-  // mid / end: faded badge — clearly connected to the start badge above
+  if (pos === 'mid') return (
+    <span data-badge className={`${base} ${clickable} text-transparent border-x px-1 shrink-0 self-stretch select-none`} onClick={handle}>
+      {initials}
+    </span>
+  )
   return (
-    <span
-      data-badge
-      className={`${base} border rounded px-1 shrink-0 self-stretch flex items-center opacity-30 ${primary ? '' : 'bg-secondary-background'} ${clickable}`}
-      onClick={handle}
-    >
+    <span data-badge className={`${base} ${clickable} text-transparent border border-t-0 rounded-b px-1 shrink-0 self-stretch select-none`} onClick={handle}>
       {initials}
     </span>
   )
