@@ -23,22 +23,22 @@ function makeBadge(initials: string, pos: NotePosition, primary: boolean, onClic
   const clickable = onClick ? 'cursor-pointer hover:opacity-70' : ''
   const handle = onClick ? (e: React.MouseEvent) => { e.stopPropagation(); onClick(e) } : undefined
   if (pos === 'solo') return (
-    <span className={`${base} ${clickable} border rounded px-1 shrink-0 self-center ${primary ? '' : 'bg-secondary-background'}`} onClick={handle}>
+    <span data-badge className={`${base} ${clickable} border rounded px-1 shrink-0 self-center ${primary ? '' : 'bg-secondary-background'}`} onClick={handle}>
       {initials}
     </span>
   )
   if (pos === 'start') return (
-    <span className={`${base} ${clickable} border border-b-0 rounded-t px-1 shrink-0 self-stretch flex items-center`} onClick={handle}>
+    <span data-badge className={`${base} ${clickable} border border-b-0 rounded-t px-1 shrink-0 self-stretch flex items-center`} onClick={handle}>
       {initials}
     </span>
   )
   if (pos === 'mid') return (
-    <span className={`${base} ${clickable} text-transparent border-x px-1 shrink-0 select-none self-stretch`} onClick={handle}>
+    <span data-badge className={`${base} ${clickable} text-transparent border-x px-1 shrink-0 select-none self-stretch`} onClick={handle}>
       {initials}
     </span>
   )
   return (
-    <span className={`${base} ${clickable} text-transparent border-x border-b rounded-b px-1 shrink-0 select-none self-stretch`} onClick={handle}>
+    <span data-badge className={`${base} ${clickable} text-transparent border-x border-b rounded-b px-1 shrink-0 select-none self-stretch`} onClick={handle}>
       {initials}
     </span>
   )
@@ -62,7 +62,7 @@ export function LineRenderer({ line, showVariants, initials, notePosition, onBad
 
   return (
     <div
-      className={`flex gap-3 items-stretch cursor-pointer hover:bg-black/5 px-2 rounded transition-colors ${highlight}`}
+      className={`flex gap-3 items-stretch cursor-pointer hover:bg-black/5 [&:has([data-badge]:hover)]:bg-transparent px-2 rounded transition-colors ${highlight}`}
       onClick={() => onClick(line)}
     >
       <span className="text-xs text-gray-400 select-none w-16 shrink-0 text-right font-mono py-0.5 self-center">
