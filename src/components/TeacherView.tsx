@@ -167,9 +167,11 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
 
                     <span className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                       <span className="font-mono font-bold text-primary text-sm">{c.joinCode}</span>
-                      <button
+                      <span
+                        role="button"
                         aria-label="Copy"
-                        className="inline-flex items-center justify-center size-9 rounded-base border-2 border-border bg-main text-main-foreground transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+                        tabIndex={0}
+                        className="inline-flex items-center justify-center size-9 rounded-base border-2 border-border bg-main text-main-foreground transition-all cursor-pointer"
                         onClick={() => {
                           navigator.clipboard.writeText(c.joinCode)
                           setCopied(p => ({ ...p, [c.joinCode]: true }))
@@ -178,7 +180,7 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
                       >
                         <span className="sr-only">Copy</span>
                         {copied[c.joinCode] ? <Check /> : <Clipboard />}
-                      </button>
+                      </span>
                     </span>
                   </span>
                 </AccordionTrigger>
