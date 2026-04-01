@@ -95,5 +95,9 @@ Two maps: `annotated` (student's own) and `teacherAnnotated` (all teacher notes,
 - Teacher badge: `primary=false` → `text-muted-foreground bg-secondary-background`
 - Student badge: `primary=true` → `text-primary`
 
-## Outstanding issue — bracket visual gap
-The `start`/`end` bracket should look like a single pen-highlight box spanning multiple rows. This works **only if** there is zero vertical gap between adjacent line rows. Historically `py-0.5` on the outer div caused 4px gaps — this was fixed by moving padding to the text span. If gaps reappear, check that no vertical padding/margin has been added to the outer row div or the `data-line-id` wrapper divs in TextReader. The bracket was still being visually verified when this file was written.
+## Bracket column alignment — resolved
+The `start`/`end` bracket looks like a single pen-highlight box spanning multiple rows. Two things must hold:
+
+1. **Zero vertical gap between rows** — `py-0.5` lives on the text span, never the outer row div. Badge `self-stretch` fills the full row height. If gaps reappear, check no vertical padding/margin was added to the outer row div or the `data-line-id` wrapper divs in TextReader.
+
+2. **Teacher badge column stays horizontally anchored** — `initials` (the session's student initials) is always passed to `LineRenderer` regardless of whether there's an active note. When the teacher badge is present but the student has no note, an `invisible` placeholder span with the same text is rendered to hold the student column width. This prevents the teacher badge shifting right on continuation rows.
