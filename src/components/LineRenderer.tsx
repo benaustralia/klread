@@ -32,7 +32,16 @@ function makeBadge(initials: string, pos: NotePosition, primary: boolean, onClic
       {initials}
     </span>
   )
-  return null
+  // mid / end: faded badge — clearly connected to the start badge above
+  return (
+    <span
+      data-badge
+      className={`${base} border rounded px-1 shrink-0 self-stretch flex items-center opacity-30 ${primary ? '' : 'bg-secondary-background'} ${clickable}`}
+      onClick={handle}
+    >
+      {initials}
+    </span>
+  )
 }
 
 export function LineRenderer({ line, showVariants, initials, notePosition, onBadgeClick, teacherInitials, teacherNotePosition, onTeacherBadgeClick, onClick }: {
