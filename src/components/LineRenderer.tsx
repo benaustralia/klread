@@ -83,10 +83,13 @@ export function LineRenderer({ line, showVariants, initials, notePosition, onBad
         {line.texta && <span className="inline align-baseline text-sky-600 ml-0.5"><TextARight /></span>}
         {line.textb && <span className="inline align-baseline text-yellow-700 ml-0.5"><TextBRight /></span>}
       </span>
-      {(teacherInitials || initials) && (
+      {((teacherInitials && teacherNotePosition) || notePosition) && (
         <span className="flex gap-1 shrink-0 self-stretch items-stretch">
           {teacherInitials && teacherNotePosition && makeBadge(teacherInitials, teacherNotePosition, false, onTeacherBadgeClick)}
-          {initials && notePosition && makeBadge(initials, notePosition, true, onBadgeClick)}
+          {notePosition
+            ? makeBadge(initials!, notePosition, true, onBadgeClick)
+            : teacherInitials && <span className="px-1 text-xs invisible select-none self-stretch">{initials}</span>
+          }
         </span>
       )}
     </div>

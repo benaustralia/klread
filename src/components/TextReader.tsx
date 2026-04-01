@@ -154,7 +154,7 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
                 : <LineRenderer
                     line={line}
                     showVariants={showVariants}
-                    initials={annotated.has(line.id) ? initials : undefined}
+                    initials={initials}
                     notePosition={annotated.get(line.id)?.pos}
                     onBadgeClick={annotated.has(line.id) ? () => {
                       const anchor = annotated.get(line.id)!.anchor
