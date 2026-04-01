@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import type { Line } from './LineRenderer'
 
 type Note = { id: string; body: string; lineIdTo?: string; updatedAt: string }
-type TeacherNote = { id: string; lineId: string; body: string; initials: string; studentName: string }
+type TeacherNote = { id: string; lineId: string; lineIdTo?: string; body: string; initials: string; studentName: string }
 
 export function NotesSheet({ line, open, onOpenChange, studentId, studentName, onSaved }: {
   line: Line | null
@@ -59,11 +59,14 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
     setNotes(p => p.filter(n => n.id !== id))
   }
 
+  const rangeEnd = teacherNotes.find(n => n.lineIdTo && n.lineIdTo !== line?.id)?.lineIdTo
+    ?? notes.find(n => n.lineIdTo && n.lineIdTo !== line?.id)?.lineIdTo
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right">
         <SheetHeader>
-          <SheetTitle>{line?.id}</SheetTitle>
+          <SheetTitle>{line?.id}{rangeEnd ? ` – ${rangeEnd}` : ''}</SheetTitle>
           <SheetDescription>
             {line?.speaker && <span className="block font-bold uppercase tracking-widest text-xs mb-0.5">{line.speaker}</span>}
             {line?.text}
