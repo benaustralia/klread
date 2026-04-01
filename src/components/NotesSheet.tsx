@@ -9,8 +9,9 @@ import type { Line } from './LineRenderer'
 type Note = { id: string; body: string; lineIdTo?: string; updatedAt: string }
 type TeacherNote = { id: string; lineId: string; lineIdTo?: string; body: string; initials: string; studentName: string }
 
-export function NotesSheet({ line, open, onOpenChange, studentId, studentName, onSaved }: {
+export function NotesSheet({ line, allLines, open, onOpenChange, studentId, studentName, onSaved }: {
   line: Line | null
+  allLines: Line[]
   open: boolean
   onOpenChange: (v: boolean) => void
   studentId: string
@@ -61,15 +62,23 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
 
   const rangeEnd = teacherNotes.find(n => n.lineIdTo && n.lineIdTo !== line?.id)?.lineIdTo
     ?? notes.find(n => n.lineIdTo && n.lineIdTo !== line?.id)?.lineIdTo
+  const rangeLines = (() => {
+    if (!line) return []
+    const from = allLines.findIndex(l => l.id === line.id)
+    const to = rangeEnd ? allLines.findIndex(l => l.id === rangeEnd) : from
+    return allLines.slice(from, to + 1).filter(l => l.type !== 'stage')
+  })()
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right">
         <SheetHeader>
           <SheetTitle>{line?.id}{rangeEnd ? ` – ${rangeEnd}` : ''}</SheetTitle>
-          <SheetDescription>
-            {line?.speaker && <span className="block font-bold uppercase tracking-widest text-xs mb-0.5">{line.speaker}</span>}
-            {line?.text}
+          <SheetDescription asChild>
+            <div>
+              {line?.speaker && <span className="block font-bold uppercase tracking-widest text-xs mb-0.5">{line.speaker}</span>}
+              {rangeLines.map(l => <p key={l.id}>{l.text}</p>)}
+            </div>
           </SheetDescription>
         </SheetHeader>
 

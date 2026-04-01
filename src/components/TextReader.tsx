@@ -171,6 +171,7 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
       </div>
       <NotesSheet
         line={selected}
+        allLines={allLines}
         open={open}
         onOpenChange={setOpen}
         studentId={studentId}
