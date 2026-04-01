@@ -34,7 +34,14 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
       .catch(() => {})
     fetch('/api/notes?teacherNotes=1')
       .then(r => r.json())
-      .then((all: TeacherNote[]) => setTeacherNotes(all.filter(n => n.lineId === line.id)))
+      .then((all: TeacherNote[]) => setTeacherNotes(all.filter(n => {
+        if (n.lineId === line.id) return true
+        if (!n.lineIdTo) return false
+        const idx = allLines.findIndex(l => l.id === line.id)
+        const from = allLines.findIndex(l => l.id === n.lineId)
+        const to = allLines.findIndex(l => l.id === n.lineIdTo)
+        return from !== -1 && to !== -1 && idx >= from && idx <= to
+      })))
       .catch(() => {})
   }, [open, line?.id])
 

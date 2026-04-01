@@ -159,7 +159,7 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
                     teacherInitials={teacherAnnotated.get(line.id)?.initials}
                     teacherNotePosition={teacherAnnotated.get(line.id)?.pos}
                     onClick={l => {
-                      const anchor = annotated.get(l.id)?.anchor ?? teacherAnnotated.get(l.id)?.anchor ?? l.id
+                      const anchor = annotated.get(l.id)?.anchor ?? l.id
                       setSelected(allLines.find(x => x.id === anchor) ?? l)
                       setOpen(true)
                     }}
