@@ -156,13 +156,19 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
                     showVariants={showVariants}
                     initials={annotated.has(line.id) ? initials : undefined}
                     notePosition={annotated.get(line.id)?.pos}
+                    onBadgeClick={annotated.has(line.id) ? () => {
+                      const anchor = annotated.get(line.id)!.anchor
+                      setSelected(allLines.find(x => x.id === anchor) ?? line)
+                      setOpen(true)
+                    } : undefined}
                     teacherInitials={teacherAnnotated.get(line.id)?.initials}
                     teacherNotePosition={teacherAnnotated.get(line.id)?.pos}
-                    onClick={l => {
-                      const anchor = annotated.get(l.id)?.anchor ?? l.id
-                      setSelected(allLines.find(x => x.id === anchor) ?? l)
+                    onTeacherBadgeClick={teacherAnnotated.has(line.id) ? () => {
+                      const anchor = teacherAnnotated.get(line.id)!.anchor
+                      setSelected(allLines.find(x => x.id === anchor) ?? line)
                       setOpen(true)
-                    }}
+                    } : undefined}
+                    onClick={l => { setSelected(l); setOpen(true) }}
                   />}
             </div>
           )

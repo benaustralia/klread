@@ -18,37 +18,41 @@ function BracketTip({ children, label }: { children: React.ReactNode; label: str
   )
 }
 
-function makeBadge(initials: string, pos: NotePosition, primary: boolean): React.ReactNode {
+function makeBadge(initials: string, pos: NotePosition, primary: boolean, onClick?: (e: React.MouseEvent) => void): React.ReactNode {
   const base = `text-xs font-semibold border-border ${primary ? 'text-primary' : 'text-muted-foreground'}`
+  const clickable = onClick ? 'cursor-pointer hover:opacity-70' : ''
+  const handle = onClick ? (e: React.MouseEvent) => { e.stopPropagation(); onClick(e) } : undefined
   if (pos === 'solo') return (
-    <span className={`${base} border rounded px-1 shrink-0 self-center ${primary ? '' : 'bg-secondary-background'}`}>
+    <span className={`${base} ${clickable} border rounded px-1 shrink-0 self-center ${primary ? '' : 'bg-secondary-background'}`} onClick={handle}>
       {initials}
     </span>
   )
   if (pos === 'start') return (
-    <span className={`${base} border border-b-0 rounded-t px-1 shrink-0 self-stretch flex items-center`}>
+    <span className={`${base} ${clickable} border border-b-0 rounded-t px-1 shrink-0 self-stretch flex items-center`} onClick={handle}>
       {initials}
     </span>
   )
   if (pos === 'mid') return (
-    <span className={`${base} text-transparent border-x px-1 shrink-0 select-none self-stretch`}>
+    <span className={`${base} ${clickable} text-transparent border-x px-1 shrink-0 select-none self-stretch`} onClick={handle}>
       {initials}
     </span>
   )
   return (
-    <span className={`${base} text-transparent border-x border-b rounded-b px-1 shrink-0 select-none self-stretch`}>
+    <span className={`${base} ${clickable} text-transparent border-x border-b rounded-b px-1 shrink-0 select-none self-stretch`} onClick={handle}>
       {initials}
     </span>
   )
 }
 
-export function LineRenderer({ line, showVariants, initials, notePosition, teacherInitials, teacherNotePosition, onClick }: {
+export function LineRenderer({ line, showVariants, initials, notePosition, onBadgeClick, teacherInitials, teacherNotePosition, onTeacherBadgeClick, onClick }: {
   line: Line
   showVariants: boolean
   initials?: string
   notePosition?: NotePosition
+  onBadgeClick?: () => void
   teacherInitials?: string
   teacherNotePosition?: NotePosition
+  onTeacherBadgeClick?: () => void
   onClick: (l: Line) => void
 }) {
   const highlight = !showVariants ? ''
@@ -79,8 +83,8 @@ export function LineRenderer({ line, showVariants, initials, notePosition, teach
         {line.texta && <span className="inline align-baseline text-sky-600 ml-0.5"><TextARight /></span>}
         {line.textb && <span className="inline align-baseline text-yellow-700 ml-0.5"><TextBRight /></span>}
       </span>
-      {teacherInitials && teacherNotePosition && makeBadge(teacherInitials, teacherNotePosition, false)}
-      {initials && notePosition && makeBadge(initials, notePosition, true)}
+      {teacherInitials && teacherNotePosition && makeBadge(teacherInitials, teacherNotePosition, false, onTeacherBadgeClick)}
+      {initials && notePosition && makeBadge(initials, notePosition, true, onBadgeClick)}
     </div>
   )
 }
