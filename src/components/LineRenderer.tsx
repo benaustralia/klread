@@ -28,16 +28,11 @@ function makeBadge(initials: string, pos: NotePosition, primary: boolean, onClic
     </span>
   )
   if (pos === 'start') return (
-    <span data-badge className={`${base} ${clickable} border border-b-0 rounded-t px-1 shrink-0 self-stretch flex items-center`} onClick={handle}>
+    <span data-badge className={`${base} ${clickable} border rounded px-1 shrink-0 self-stretch flex items-center`} onClick={handle}>
       {initials}
     </span>
   )
-  if (pos === 'mid') return (
-    <span data-badge className={`w-1 shrink-0 self-stretch border-x border-border ${clickable}`} onClick={handle} />
-  )
-  return (
-    <span data-badge className={`w-1 shrink-0 self-stretch border-x border-b border-border rounded-b ${clickable}`} onClick={handle} />
-  )
+  return null
 }
 
 export function LineRenderer({ line, showVariants, initials, notePosition, onBadgeClick, teacherInitials, teacherNotePosition, onTeacherBadgeClick, onClick }: {
