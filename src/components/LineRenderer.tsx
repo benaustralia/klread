@@ -23,7 +23,7 @@ function makeBadge(initials: string, pos: NotePosition, primary: boolean, onClic
   const clickable = onClick ? 'cursor-pointer hover:opacity-70' : ''
   const handle = onClick ? (e: React.MouseEvent) => { e.stopPropagation(); onClick(e) } : undefined
   if (pos === 'solo') return (
-    <span data-badge className={`${base} ${clickable} border rounded px-1 shrink-0 self-center ${primary ? '' : 'bg-secondary-background'}`} onClick={handle}>
+    <span data-badge className={`${base} ${clickable} border rounded px-1 shrink-0 self-stretch flex items-center ${primary ? '' : 'bg-secondary-background'}`} onClick={handle}>
       {initials}
     </span>
   )
@@ -33,14 +33,10 @@ function makeBadge(initials: string, pos: NotePosition, primary: boolean, onClic
     </span>
   )
   if (pos === 'mid') return (
-    <span data-badge className={`${base} ${clickable} text-transparent border-x px-1 shrink-0 select-none self-stretch`} onClick={handle}>
-      {initials}
-    </span>
+    <span data-badge className={`w-1 shrink-0 self-stretch border-x border-border ${clickable}`} onClick={handle} />
   )
   return (
-    <span data-badge className={`${base} ${clickable} text-transparent border-x border-b rounded-b px-1 shrink-0 select-none self-stretch`} onClick={handle}>
-      {initials}
-    </span>
+    <span data-badge className={`w-1 shrink-0 self-stretch border-x border-b border-border rounded-b ${clickable}`} onClick={handle} />
   )
 }
 
