@@ -7,11 +7,15 @@ import { Button } from '@/components/ui/button'
 import type { Line } from './LineRenderer'
 
 type Note = { id: string; body: string; lineIdTo?: string; updatedAt: string }
-type TeacherNote = { id: string; lineId: string; body: string; initials: string; studentName: string; updatedAt?: string }
+type TeacherNote = { id: string; lineId: string; body: string; initials: string; studentName: string }
 
 export function NotesSheet({ line, open, onOpenChange, studentId, studentName, onSaved }: {
-  line: Line | null; open: boolean; onOpenChange: (v: boolean) => void
-  studentId: string; studentName: string; onSaved?: (lineId: string) => void
+  line: Line | null
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  studentId: string
+  studentName: string
+  onSaved?: (lineId: string) => void
 }) {
   const [body, setBody] = useState('')
   const [lineIdTo, setLineIdTo] = useState('')
@@ -21,7 +25,8 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
 
   useEffect(() => {
     if (!open || !line || !studentId) return
-    setBody(''); setLineIdTo(line.id)
+    setBody('')
+    setLineIdTo(line.id)
     fetch(`/api/notes?studentId=${studentId}`)
       .then(r => r.json())
       .then((all: Note[]) => setNotes(all.filter((n: any) => n.lineId === line.id)))
@@ -35,12 +40,14 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
   async function save() {
     if (!body.trim() || !line) return
     setSaving(true)
+    const lineIdToVal = lineIdTo.trim() && lineIdTo.trim() !== line.id ? lineIdTo.trim() : null
     await fetch('/api/notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId, studentName, lineId: line.id, lineIdTo: lineIdTo.trim() && lineIdTo.trim() !== line.id ? lineIdTo.trim() : null, act: line.act, scene: line.scene, body: body.trim() })
+      body: JSON.stringify({ studentId, studentName, lineId: line.id, lineIdTo: lineIdToVal, act: line.act, scene: line.scene, body: body.trim() }),
     }).catch(() => {})
-    setBody(''); setLineIdTo('')
+    setBody('')
+    setLineIdTo(line.id)
     const all = await fetch(`/api/notes?studentId=${studentId}`).then(r => r.json()).catch(() => [])
     setNotes(all.filter((n: any) => n.lineId === line.id))
     onSaved?.(line.id)
@@ -66,7 +73,14 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
         <div className="grid flex-1 auto-rows-min gap-6 px-4">
           <div className="grid gap-3">
             <Label htmlFor="note-body">Note</Label>
-            <Textarea id="note-body" placeholder="Write your note…" value={body} onChange={e => setBody(e.target.value)} rows={5} className="resize-none" />
+            <Textarea
+              id="note-body"
+              placeholder="Write your note…"
+              value={body}
+              onChange={e => setBody(e.target.value)}
+              rows={5}
+              className="resize-none"
+            />
           </div>
 
           <div className="grid gap-2">
@@ -75,7 +89,12 @@ export function NotesSheet({ line, open, onOpenChange, studentId, studentName, o
               <span className="text-sm text-muted-foreground shrink-0">From</span>
               <Input value={line?.id ?? ''} readOnly className="font-mono w-24 shrink-0 bg-muted" />
               <span className="text-sm text-muted-foreground shrink-0">to</span>
-              <Input id="note-range" value={lineIdTo} onChange={e => setLineIdTo(e.target.value)} className="font-mono w-24 shrink-0" />
+              <Input
+                id="note-range"
+                value={lineIdTo}
+                onChange={e => setLineIdTo(e.target.value)}
+                className="font-mono w-24 shrink-0"
+              />
             </div>
           </div>
 

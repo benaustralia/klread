@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import React from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { LineRenderer, type Line, type NotePosition } from './LineRenderer'
 import { NotesSheet } from './NotesSheet'
 
@@ -27,44 +26,65 @@ const SHORT: Record<string, string> = {
 }
 export function shortLocation(loc: string) { return SHORT[loc] ?? loc }
 
+type Annotation = { pos: NotePosition; anchor: string; initials?: string }
+
+function buildAnnotationMap(
+  notes: { lineId: string; lineIdTo?: string; initials?: string }[],
+  allLineIds: string[]
+): Map<string, Annotation> {
+  const map = new Map<string, Annotation>()
+  for (const n of notes) {
+    if (n.lineIdTo && n.lineIdTo !== n.lineId) {
+      const from = allLineIds.indexOf(n.lineId)
+      const to = allLineIds.indexOf(n.lineIdTo)
+      if (from !== -1 && to !== -1) {
+        allLineIds.slice(from, to + 1).forEach((id, i, arr) => {
+          const pos: NotePosition = i === 0 ? 'start' : i === arr.length - 1 ? 'end' : 'mid'
+          if (!map.has(id) || pos === 'start') map.set(id, { pos, anchor: n.lineId, initials: n.initials })
+        })
+      }
+    } else {
+      if (!map.has(n.lineId)) map.set(n.lineId, { pos: 'solo', anchor: n.lineId, initials: n.initials })
+    }
+  }
+  return map
+}
+
 export function TextReader({ acts, showVariants, studentId, studentName, initials, actNum, sceneNum, onBookmark, scrollToLineId }: {
-  acts: ActData[]; showVariants: boolean; studentId: string; studentName: string; initials: string;
-  actNum: number; sceneNum: number; onBookmark?: (lineId: string) => void; scrollToLineId?: string;
+  acts: ActData[]
+  showVariants: boolean
+  studentId: string
+  studentName: string
+  initials: string
+  actNum: number
+  sceneNum: number
+  onBookmark?: (lineId: string) => void
+  scrollToLineId?: string
 }) {
   const [selected, setSelected] = useState<Line | null>(null)
   const [open, setOpen] = useState(false)
-  const [annotated, setAnnotated] = useState<Map<string, { pos: NotePosition; anchor: string }>>(new Map())
-  const [teacherAnnotated, setTeacherAnnotated] = useState<Map<string, { pos: NotePosition; anchor: string; initials: string }>>(new Map())
+  const [annotated, setAnnotated] = useState<Map<string, Annotation>>(new Map())
+  const [teacherAnnotated, setTeacherAnnotated] = useState<Map<string, Annotation>>(new Map())
   const scrolledRef = useRef(false)
-  const allLineIds = acts.flatMap(a => a.scenes.flatMap(s => s.lines.map(l => l.id)))
+
+  const allLineIds = useMemo(() => acts.flatMap(a => a.scenes.flatMap(s => s.lines.map(l => l.id))), [acts])
+  const allLines = useMemo(() => acts.flatMap(a => a.scenes.flatMap(s => s.lines)), [acts])
 
   useEffect(() => {
     fetch(`/api/notes?studentId=${studentId}`)
       .then(r => r.json())
-      .then((notes: { lineId: string; lineIdTo?: string }[]) => {
-        const map = new Map<string, { pos: NotePosition; anchor: string }>()
-        notes.forEach(n => {
-          if (n.lineIdTo && n.lineIdTo !== n.lineId) {
-            const from = allLineIds.indexOf(n.lineId), to = allLineIds.indexOf(n.lineIdTo)
-            if (from !== -1 && to !== -1) {
-              allLineIds.slice(from, to + 1).forEach((id, i, arr) => {
-                const pos: NotePosition = i === 0 ? 'start' : i === arr.length - 1 ? 'end' : 'mid'
-                if (!map.has(id) || pos === 'start') map.set(id, { pos, anchor: n.lineId })
-              })
-            }
-          } else {
-            if (!map.has(n.lineId)) map.set(n.lineId, { pos: 'solo', anchor: n.lineId })
-          }
-        })
-        setAnnotated(map)
-      }).catch(() => {})
+      .then((notes: { lineId: string; lineIdTo?: string }[]) => setAnnotated(buildAnnotationMap(notes, allLineIds)))
+      .catch(() => {})
   }, [studentId])
 
-  // Scroll to bookmark on first render of this act/scene
   useEffect(() => {
-    if (!scrollToLineId) return
-    scrolledRef.current = false
-  }, [scrollToLineId])
+    fetch('/api/notes?teacherNotes=1')
+      .then(r => r.json())
+      .then((notes: { lineId: string; lineIdTo?: string; initials: string }[]) => setTeacherAnnotated(buildAnnotationMap(notes, allLineIds)))
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => { if (scrollToLineId) scrolledRef.current = false }, [scrollToLineId])
 
   useEffect(() => {
     if (!scrollToLineId || scrolledRef.current) return
@@ -75,19 +95,14 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
     }
   })
 
-  // Debounced scroll handler — report topmost visible speech line
   const bookmarkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const handleScroll = useCallback(() => {
     if (!onBookmark) return
     if (bookmarkTimer.current) clearTimeout(bookmarkTimer.current)
     bookmarkTimer.current = setTimeout(() => {
-      const els = document.querySelectorAll<HTMLElement>('[data-line-id]')
-      for (const el of els) {
-        const rect = el.getBoundingClientRect()
-        if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
-          onBookmark(el.dataset.lineId!)
-          break
-        }
+      for (const el of document.querySelectorAll<HTMLElement>('[data-line-id]')) {
+        const { top, bottom } = el.getBoundingClientRect()
+        if (top >= 0 && bottom <= window.innerHeight) { onBookmark(el.dataset.lineId!); break }
       }
     }, 1500)
   }, [onBookmark])
@@ -98,37 +113,14 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
   }, [handleScroll])
 
   useEffect(() => {
-    fetch('/api/notes?teacherNotes=1')
-      .then(r => r.json())
-      .then((notes: { lineId: string; lineIdTo?: string; initials: string }[]) => {
-        const map = new Map<string, { pos: NotePosition; anchor: string; initials: string }>()
-        notes.forEach(n => {
-          if (n.lineIdTo && n.lineIdTo !== n.lineId) {
-            const from = allLineIds.indexOf(n.lineId), to = allLineIds.indexOf(n.lineIdTo)
-            if (from !== -1 && to !== -1) {
-              allLineIds.slice(from, to + 1).forEach((id, i, arr) => {
-                const pos: NotePosition = i === 0 ? 'start' : i === arr.length - 1 ? 'end' : 'mid'
-                if (!map.has(id) || pos === 'start') map.set(id, { pos, anchor: n.lineId, initials: n.initials })
-              })
-            }
-          } else {
-            if (!map.has(n.lineId)) map.set(n.lineId, { pos: 'solo', anchor: n.lineId, initials: n.initials })
-          }
-        })
-        setTeacherAnnotated(map)
-      }).catch(() => {})
-  }, [])
-
-  useEffect(() => {
     document.title = `Act ${ROMAN[actNum]} · Scene ${sceneNum} — King Lear Promptbook`
     return () => { document.title = 'King Lear Promptbook' }
   }, [actNum, sceneNum])
 
   function onNotesSaved(lineId: string) {
     setAnnotated(prev => {
-      const next = new Map(prev)
-      if (!next.has(lineId)) next.set(lineId, { pos: 'solo', anchor: lineId })
-      return next
+      if (prev.has(lineId)) return prev
+      return new Map(prev).set(lineId, { pos: 'solo', anchor: lineId })
     })
   }
 
@@ -139,9 +131,13 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
       <div className="max-w-2xl mx-auto py-4">
         {currentScene?.location && (
           <div className="mb-6 border-b pb-4">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1">Act {ROMAN[actNum]} · Scene {sceneNum}</p>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1">
+              Act {ROMAN[actNum]} · Scene {sceneNum}
+            </p>
             <p className="font-semibold">{currentScene.location}</p>
-            {currentScene.synopsis && <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{currentScene.synopsis}</p>}
+            {currentScene.synopsis && (
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{currentScene.synopsis}</p>
+            )}
           </div>
         )}
         {currentScene?.lines.reduce<{ el: React.ReactElement[]; last: string | undefined }>((acc, line) => {
@@ -152,24 +148,35 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
             <div key={line.id} data-line-id={!isStage ? line.id : undefined}>
               {showSpk && <p className="speaker-label">{line.speaker}</p>}
               {isStage
-                ? (line.stageType !== 'delivery' && <p className="text-sm italic text-muted-foreground px-2 py-0.5 my-1">{line.text}</p>)
-                : <LineRenderer line={line} showVariants={showVariants}
-                    initials={annotated.has(line.id) ? initials : undefined} notePosition={annotated.get(line.id)?.pos}
-                    teacherInitials={teacherAnnotated.get(line.id)?.initials} teacherNotePosition={teacherAnnotated.get(line.id)?.pos}
+                ? (line.stageType !== 'delivery' && (
+                    <p className="text-sm italic text-muted-foreground px-2 py-0.5 my-1">{line.text}</p>
+                  ))
+                : <LineRenderer
+                    line={line}
+                    showVariants={showVariants}
+                    initials={annotated.has(line.id) ? initials : undefined}
+                    notePosition={annotated.get(line.id)?.pos}
+                    teacherInitials={teacherAnnotated.get(line.id)?.initials}
+                    teacherNotePosition={teacherAnnotated.get(line.id)?.pos}
                     onClick={l => {
-                      const entry = annotated.get(l.id)
-                      const teacherEntry = teacherAnnotated.get(l.id)
-                      const anchorId = entry?.anchor ?? teacherEntry?.anchor ?? l.id
-                      const anchorLine = acts.flatMap(a => a.scenes.flatMap(s => s.lines)).find(x => x.id === anchorId) ?? l
-                      setSelected(anchorLine); setOpen(true)
-                    }} />}
+                      const anchor = annotated.get(l.id)?.anchor ?? teacherAnnotated.get(l.id)?.anchor ?? l.id
+                      setSelected(allLines.find(x => x.id === anchor) ?? l)
+                      setOpen(true)
+                    }}
+                  />}
             </div>
           )
           return acc
         }, { el: [], last: undefined }).el}
       </div>
-
-      <NotesSheet line={selected} open={open} onOpenChange={setOpen} studentId={studentId} studentName={studentName} onSaved={onNotesSaved} />
+      <NotesSheet
+        line={selected}
+        open={open}
+        onOpenChange={setOpen}
+        studentId={studentId}
+        studentName={studentName}
+        onSaved={onNotesSaved}
+      />
     </>
   )
 }
