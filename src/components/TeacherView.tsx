@@ -10,6 +10,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { TextReader } from './TextReader'
 import { SceneNav } from './SceneNav'
 import { Progress } from '@/components/ui/progress'
+import { Clipboard, Check } from 'lucide-react'
 import learData from '../data/king-lear.json'
 
 type Note = { id: string; studentName: string; joinCode: string; lineId: string; body: string; updatedAt: string }
@@ -61,6 +62,7 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   }
   const [showVariants, setShowVariants] = useState(true)
   const [label, setLabel] = useState(''); const [codeInput, setCodeInput] = useState(''); const [creating, setCreating] = useState(false)
+  const [copied, setCopied] = useState<Record<string, boolean>>({})
   const [newStudent, setNewStudent] = useState<Record<string, { name: string; initials: string }>>({})
   const [addingStudent, setAddingStudent] = useState<Record<string, boolean>>({})
   const [err, setErr] = useState('')
@@ -161,9 +163,23 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
               <AccordionItem key={c.joinCode} value={c.joinCode}>
                 <AccordionTrigger className="hover:no-underline">
                   <span className="flex items-center gap-3 text-left">
-                    <span className="font-mono font-bold text-primary">{c.joinCode}</span>
                     <span className="font-medium">{c.label}</span>
                     <Badge>{students.length} students</Badge>
+                    <span className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                      <span className="font-mono font-bold text-primary text-sm">{c.joinCode}</span>
+                      <button
+                        aria-label="Copy"
+                        className="inline-flex items-center justify-center size-9 rounded-base border-2 border-border bg-main text-main-foreground transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+                        onClick={() => {
+                          navigator.clipboard.writeText(c.joinCode)
+                          setCopied(p => ({ ...p, [c.joinCode]: true }))
+                          setTimeout(() => setCopied(p => ({ ...p, [c.joinCode]: false })), 1500)
+                        }}
+                      >
+                        <span className="sr-only">Copy</span>
+                        {copied[c.joinCode] ? <Check /> : <Clipboard />}
+                      </button>
+                    </span>
                   </span>
                 </AccordionTrigger>
                 <AccordionContent>
