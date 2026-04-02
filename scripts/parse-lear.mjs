@@ -137,11 +137,31 @@ for (const div1 of div1s) {
             const ftln = ftlnMatch ? parseInt(ftlnMatch[1], 10) : 0
             const correspRaw = ms['@_corresp'] ?? ''
             const wordIds = correspRaw.split(/\s+/).filter(Boolean).map(s => s.replace(/^#/, ''))
-            const text = wordIds.map(id => wordMap.get(id) ?? '').join('')
             const anaRaw = ms['@_ana'] ?? ''
             const ana = anaRaw.replace(/^#/, '')
-            const texta = wordIds.some(id => textaIds.has(id)) ? true : undefined
-            const textb = wordIds.some(id => textbIds.has(id)) ? true : undefined
+
+            // Build text and track character-level variant positions
+            let text = ''
+            const rawVariants = []
+            for (const id of wordIds) {
+              const word = wordMap.get(id) ?? ''
+              const start = text.length
+              text += word
+              const end = text.length
+              if (textaIds.has(id)) rawVariants.push({ type: 'a', charStart: start, charEnd: end })
+              if (textbIds.has(id)) rawVariants.push({ type: 'b', charStart: start, charEnd: end })
+            }
+
+            // Merge adjacent variants of the same type into contiguous ranges
+            const variants = []
+            for (const v of rawVariants) {
+              const prev = variants[variants.length - 1]
+              if (prev && prev.type === v.type && prev.charEnd === v.charStart) {
+                prev.charEnd = v.charEnd
+              } else {
+                variants.push({ ...v })
+              }
+            }
 
             const line = {
               id: lineId,
@@ -152,8 +172,7 @@ for (const div1 of div1s) {
               text,
               ana: ['verse', 'prose', 'short'].includes(ana) ? ana : 'prose',
             }
-            if (texta) line.texta = true
-            if (textb) line.textb = true
+            if (variants.length) line.variants = variants
             lines.push(line)
           }
         } else if (key !== '@_xml:id' && key !== '@_n' && key !== '@_type' && key !== '@_who') {
@@ -172,13 +191,11 @@ console.log(`Written ${outPath}`)
 
 // Summary
 let totalLines = 0
-let textaCount = 0
-let textbCount = 0
+let variantLines = 0
 for (const act of acts) {
   for (const scene of act.scenes) {
     totalLines += scene.lines.length
-    textaCount += scene.lines.filter(l => l.texta).length
-    textbCount += scene.lines.filter(l => l.textb).length
+    variantLines += scene.lines.filter(l => l.variants).length
   }
 }
-console.log(`Total lines: ${totalLines}, texta: ${textaCount}, textb: ${textbCount}`)
+console.log(`Total lines: ${totalLines}, lines with variants: ${variantLines}`)
