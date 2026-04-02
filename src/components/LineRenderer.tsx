@@ -1,52 +1,37 @@
 import { TextALeft, TextARight, TextBLeft, TextBRight } from './brackets'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-export type Variant = { type: 'a' | 'b'; charStart: number; charEnd: number }
 export type Line = {
   id: string; ftln?: number; act: number; scene: number
   speaker?: string; text: string; ana?: 'verse' | 'prose' | 'short'
-  variants?: Variant[]; type?: 'stage'; stageType?: string; inline?: boolean
+  texta?: true; textb?: true; type?: 'stage'; stageType?: string; inline?: boolean
 }
 export type Highlight = { charStart?: number; charEnd?: number; anchor: string }
 
 const VT = { a: 'Quarto 1608 only — not in the Folio', b: 'Folio 1623 only — not in the First Quarto' } as const
-const VC = { a: 'text-sky-600', b: 'text-yellow-700' } as const
-const VB = { a: 'bg-sky-200', b: 'bg-yellow-200' } as const
 
-function Bracket({ type, open }: { type: 'a' | 'b'; open: boolean }) {
-  const Icon = open ? (type === 'a' ? TextALeft : TextBLeft) : (type === 'a' ? TextARight : TextBRight)
+function BracketTip({ children, label }: { children: React.ReactNode; label: string }) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex items-baseline">
-          <span className={`inline align-baseline ${open ? 'mr-0.5' : 'ml-0.5'} ${VC[type]}`}><Icon /></span>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{VT[type]}</TooltipContent>
+      <TooltipTrigger asChild><span className="inline-flex items-baseline">{children}</span></TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
     </Tooltip>
   )
 }
 
-function renderText(text: string, hl: Highlight[], variants: Variant[], onHl: (a: string) => void) {
+function renderText(text: string, hl: Highlight[], onHl: (a: string) => void) {
+  if (!hl.length) return <span data-line-text>{text}</span>
   const pts = new Set([0, text.length])
   for (const h of hl) { pts.add(h.charStart ?? 0); pts.add(h.charEnd ?? text.length) }
-  for (const v of variants) { pts.add(v.charStart); pts.add(v.charEnd) }
   const sorted = [...pts].sort((a, b) => a - b)
-  if (sorted.length === 2 && !variants.length && !hl.length) return <span data-line-text>{text}</span>
   const parts: React.ReactNode[] = []
   for (let i = 0; i < sorted.length - 1; i++) {
     const [s, e] = [sorted[i], sorted[i + 1]]
-    for (const v of variants.filter(x => x.charStart === s))
-      parts.push(<Bracket key={`o${s}-${v.type}`} type={v.type} open />)
     const seg = text.slice(s, e)
-    const vr = variants.find(x => x.charStart <= s && x.charEnd >= e)
     const h = hl.find(x => (x.charStart ?? 0) <= s && (x.charEnd ?? text.length) >= e)
-    const cls = [vr && VB[vr.type], h && 'bg-main/25 rounded-sm cursor-pointer hover:bg-main/40 not-italic'].filter(Boolean).join(' ')
-    if (h) parts.push(<mark key={`s${i}`} className={cls} onClick={ev => { ev.stopPropagation(); onHl(h.anchor) }}>{seg}</mark>)
-    else if (cls) parts.push(<span key={`s${i}`} className={cls}>{seg}</span>)
+    if (h) parts.push(<mark key={`s${i}`} className="bg-main/25 rounded-sm cursor-pointer hover:bg-main/40 not-italic"
+      onClick={ev => { ev.stopPropagation(); onHl(h.anchor) }}>{seg}</mark>)
     else parts.push(seg)
-    for (const v of variants.filter(x => x.charEnd === e))
-      parts.push(<Bracket key={`c${e}-${v.type}`} type={v.type} open={false} />)
   }
   return <span data-line-text>{parts}</span>
 }
@@ -62,7 +47,11 @@ export function LineRenderer({ line, highlights = [], onHighlightClick, onClick 
         {line.id}
       </span>
       <span className={`leading-relaxed flex-1 py-0.5 ${line.ana !== 'prose' ? 'pl-6' : ''}`}>
-        {renderText(line.text, highlights, line.variants ?? [], onHighlightClick)}
+        {line.texta && <BracketTip label={VT.a}><span className="text-sky-600 mr-0.5"><TextALeft /></span></BracketTip>}
+        {line.textb && <BracketTip label={VT.b}><span className="text-yellow-700 mr-0.5"><TextBLeft /></span></BracketTip>}
+        {renderText(line.text, highlights, onHighlightClick)}
+        {line.texta && <span className="text-sky-600 ml-0.5"><TextARight /></span>}
+        {line.textb && <span className="text-yellow-700 ml-0.5"><TextBRight /></span>}
       </span>
     </div>
   )
