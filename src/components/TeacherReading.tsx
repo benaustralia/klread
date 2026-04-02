@@ -16,7 +16,7 @@ export function TeacherReading({ teacherStudentId, teacherName }: {
   if (!s.reading) return null
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background @container/app">
         <ReadingHeader
           left={<span className="flex items-center gap-2">
             <Button variant="neutral" size="sm" onClick={() => s.setReading(null)}>← Back</Button>
@@ -25,7 +25,7 @@ export function TeacherReading({ teacherStudentId, teacherName }: {
           right={<Button variant="neutral" size="sm" className="text-xs" onClick={() => s.set({ notesOpen: true })}>Notes</Button>}
           acts={learData.acts as any} actNum={s.actNum} sceneNum={s.sceneNum}
           onGoTo={(a, sc) => s.set({ actNum: a, sceneNum: sc })} scrollProgress={scrollProgress} />
-        <main className="px-2 py-4 sm:px-6">
+        <main className="px-2 py-4 @[60rem]/app:px-6">
           <TextReader acts={learData.acts as any} studentId={teacherStudentId ?? ''}
             studentName={teacherName ?? ''} actNum={s.actNum} sceneNum={s.sceneNum}
             joinCode={s.reading?.joinCode} isTeacher />
