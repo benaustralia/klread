@@ -5,6 +5,7 @@ import { TextReader } from './TextReader'
 import { ReadingHeader } from './ReadingHeader'
 import { AllNotesSheet } from './AllNotesSheet'
 import { SearchDialog } from './SearchDialog'
+import { BrokenCrown } from './BrokenCrown'
 import { useTeacher, subScroll, getScroll } from './teacherStore'
 import { learPromise } from '../data/lear'
 
@@ -32,9 +33,11 @@ export function TeacherReading({ teacherStudentId, teacherName }: {
     <TooltipProvider>
       <div className="min-h-screen bg-background">
         <ReadingHeader
-          left={<span className="flex items-center gap-2">
-            <span className="font-semibold text-sm">{s.reading.label}</span>
-          </span>}
+          left={<h1 className="text-lg font-bold flex items-center gap-2 flex-wrap">
+            <BrokenCrown className="w-8 h-8" />
+            King Lear <span className="text-main">Promptbook</span>
+            <span className="text-sm font-semibold text-muted-foreground">— {s.reading.label}</span>
+          </h1>}
           right={<span className="flex items-center gap-1">{toolbar}</span>}
           acts={learData.acts as any} actNum={s.actNum} sceneNum={s.sceneNum}
           onGoTo={(a, sc) => s.set({ actNum: a, sceneNum: sc })} scrollProgress={scrollProgress} />
