@@ -1,15 +1,16 @@
-import { useSyncExternalStore } from 'react'
+import { use, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { TextReader } from './TextReader'
 import { ReadingHeader } from './ReadingHeader'
 import { AllNotesSheet } from './AllNotesSheet'
 import { useTeacher, subScroll, getScroll } from './teacherStore'
-import learData from '../data/king-lear.json'
+import { learPromise } from '../data/lear'
 
 export function TeacherReading({ teacherStudentId, teacherName }: {
   teacherStudentId?: string; teacherName?: string
 }) {
+  const learData = use(learPromise)
   const s = useTeacher()
   const scrollProgress = useSyncExternalStore(subScroll, getScroll)
   if (!s.reading) return null

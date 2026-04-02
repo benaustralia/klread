@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useSyncExternalStore } from 'react'
+import { use, useState, useEffect, useRef, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { BrokenCrown } from './components/BrokenCrown'
@@ -8,7 +8,7 @@ import { LoginCard } from './components/LoginCard'
 import { TeacherView } from './components/TeacherView'
 import { ReadingHeader } from './components/ReadingHeader'
 import { AllNotesSheet } from './components/AllNotesSheet'
-import learData from './data/king-lear.json'
+import { learPromise } from './data/lear'
 
 type Session = {
   studentId: string; studentName: string; joinCode: string
@@ -24,6 +24,7 @@ const getScroll = () => Math.round(document.documentElement.scrollTop / (documen
 export default function App() {
   if (new URLSearchParams(location.search).has('logout')) { localStorage.removeItem(KEY); location.replace('/') }
 
+  const learData = use(learPromise)
   const [session, setSession] = useState<Session | null>(stored)
   const [actNum, setActNum] = useState(1)
   const [sceneNum, setSceneNum] = useState(1)
