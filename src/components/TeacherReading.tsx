@@ -21,11 +21,11 @@ export function TeacherReading({ teacherStudentId, teacherName }: {
 
   const cycleSize = (dir: -1 | 1) => () => setTextSize(sz => sizes[sizes.indexOf(sz) + dir])
   const toolbar = <>
+    <Button variant="neutral" size="sm" className="text-xs" onClick={() => s.setReading(null)}>← Back</Button>
     <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'base'} onClick={cycleSize(-1)}>A−</Button>
     <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'xl'} onClick={cycleSize(1)}>A+</Button>
     <Button onClick={() => s.set({ notesOpen: true })} variant="neutral" size="sm" className="text-xs">Notes</Button>
     <Button onClick={() => setSearchOpen(true)} variant="neutral" size="sm" className="text-xs">Search</Button>
-    <Button variant="neutral" size="sm" className="text-xs" onClick={() => s.setReading(null)}>← Back</Button>
   </>
 
   return (
