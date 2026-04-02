@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://klread.vercel.app/sitemap.xml
