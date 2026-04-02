@@ -97,6 +97,7 @@ for (const div1 of div1s) {
     const sceneNum = parseInt(div2['@_n'], 10)
     if (isNaN(sceneNum)) continue
     const lines = []
+    const seenLineIds = new Set()
     scenes.push({ num: sceneNum, lines })
 
     // Walk the scene collecting milestones with speaker context
@@ -173,6 +174,8 @@ for (const div1 of div1s) {
               ana: ['verse', 'prose', 'short'].includes(ana) ? ana : 'prose',
             }
             if (variants.length) line.variants = variants
+            if (seenLineIds.has(lineId)) continue
+            seenLineIds.add(lineId)
             lines.push(line)
           }
         } else if (key !== '@_xml:id' && key !== '@_n' && key !== '@_type' && key !== '@_who') {
