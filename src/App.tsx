@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { BrokenCrown } from './components/BrokenCrown'
 import { TextReader } from './components/TextReader'
+
 import { SearchDialog } from './components/SearchDialog'
 import { LoginCard } from './components/LoginCard'
 import { TeacherView } from './components/TeacherView'
@@ -130,11 +131,7 @@ export default function App() {
     <TooltipProvider>
       <div className="min-h-screen bg-background">
         {session && learData ? (
-          <ReadingHeader
-            left={<h1 className="text-lg font-bold flex items-center gap-2 flex-wrap">
-              <BrokenCrown className="w-8 h-8" /> King Lear <span className="text-main">Promptbook</span>
-            </h1>}
-            right={<span className="flex items-center gap-1">{toolbar}</span>}
+          <ReadingHeader toolbar={toolbar}
             acts={learData.acts as any} actNum={actNum} sceneNum={sceneNum}
             onGoTo={goTo} scrollProgress={scrollProgress} />
         ) : (
@@ -158,11 +155,6 @@ export default function App() {
                   isNew={isNew} loading={loading} err={err} onJoin={join} />}
         </main>
       </div>
-      {session && (
-        <div className="min-[960px]:hidden fixed bottom-0 inset-x-0 z-10 bg-background border-t flex items-center justify-around px-4 py-2">
-          {toolbar}
-        </div>
-      )}
       {session && <AllNotesSheet studentId={session.studentId} joinCode={session.joinCode}
         open={notesOpen} onOpenChange={setNotesOpen} />}
       {learData && <SearchDialog acts={learData.acts as any} open={searchOpen} onOpenChange={setSearchOpen}

@@ -5,7 +5,6 @@ import { TextReader } from './TextReader'
 import { ReadingHeader } from './ReadingHeader'
 import { AllNotesSheet } from './AllNotesSheet'
 import { SearchDialog } from './SearchDialog'
-import { BrokenCrown } from './BrokenCrown'
 import { useTeacher, subScroll, getScroll } from './teacherStore'
 import { learPromise } from '../data/lear'
 
@@ -32,13 +31,7 @@ export function TeacherReading({ teacherStudentId, teacherName }: {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <ReadingHeader
-          left={<h1 className="text-lg font-bold flex items-center gap-2 flex-wrap">
-            <BrokenCrown className="w-8 h-8" />
-            King Lear <span className="text-main">Promptbook</span>
-            <span className="text-sm font-semibold text-muted-foreground">— {s.reading.label}</span>
-          </h1>}
-          right={<span className="flex items-center gap-1">{toolbar}</span>}
+        <ReadingHeader subtitle={s.reading.label} toolbar={toolbar}
           acts={learData.acts as any} actNum={s.actNum} sceneNum={s.sceneNum}
           onGoTo={(a, sc) => s.set({ actNum: a, sceneNum: sc })} scrollProgress={scrollProgress} />
         <main className="px-2 py-4 min-[960px]:px-6 pb-20 min-[960px]:pb-4">
@@ -46,9 +39,6 @@ export function TeacherReading({ teacherStudentId, teacherName }: {
             studentName={teacherName ?? ''} actNum={s.actNum} sceneNum={s.sceneNum}
             joinCode={s.reading?.joinCode} isTeacher textSize={textSize} />
         </main>
-        <div className="min-[960px]:hidden fixed bottom-0 inset-x-0 z-10 bg-background border-t flex items-center justify-around px-4 py-2">
-          {toolbar}
-        </div>
         <AllNotesSheet studentId={teacherStudentId ?? ''} joinCode={s.reading.joinCode}
           open={s.notesOpen} onOpenChange={v => s.set({ notesOpen: v })} isTeacher />
         <SearchDialog acts={learData.acts as any} open={searchOpen} onOpenChange={setSearchOpen}
