@@ -3,13 +3,14 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { DataTable } from '@/components/ui/data-table'
 import { TextReader } from './TextReader'
-import { SceneNav } from './SceneNav'
-import { Progress } from '@/components/ui/progress'
+import { ReadingHeader } from './ReadingHeader'
+import { BrokenCrown } from './BrokenCrown'
+import { AllNotesSheet } from './AllNotesSheet'
 import { Clipboard, Check } from 'lucide-react'
 import learData from '../data/king-lear.json'
 
@@ -17,7 +18,9 @@ type Note = { id: string; studentName: string; joinCode: string; lineId: string;
 type Class = { joinCode: string; label: string; createdAt: string }
 type Student = { studentId: string; studentName: string; joinCode: string; initials: string; lastSeen: string; noteCount: number }
 
-const studentColumns: ColumnDef<Student>[] = [
+const fmtInitials = (v: string) => v.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4).split('').join('.')
+
+const makeStudentColumns = (onDelete: (id: string) => void): ColumnDef<Student>[] => [
   { accessorKey: 'studentName', header: 'Name' },
   { accessorKey: 'initials', header: 'Initials', cell: ({ row }) => <span className="font-mono text-xs">{row.getValue('initials')}</span> },
   { accessorKey: 'noteCount', header: 'Notes', cell: ({ row }) => <Badge>{row.getValue('noteCount')}</Badge> },
@@ -28,19 +31,21 @@ const studentColumns: ColumnDef<Student>[] = [
       return <span className="text-muted-foreground">{v ? new Date(v).toLocaleString() : '—'}</span>
     },
   },
+  {
+    id: 'actions',
+    cell: ({ row }) => (
+      <button onClick={() => onDelete(row.original.studentId)} className="text-xs text-muted-foreground hover:text-destructive">
+        Remove
+      </button>
+    ),
+  },
 ]
 
-const noteColumns: ColumnDef<Note>[] = [
-  { accessorKey: 'studentName', header: 'Student' },
-  { accessorKey: 'lineId', header: 'Line', cell: ({ row }) => <span className="font-mono text-primary">{row.getValue('lineId')}</span> },
-  { accessorKey: 'body', header: 'Note', cell: ({ row }) => <span className="leading-relaxed">{row.getValue('body')}</span> },
-  { accessorKey: 'updatedAt', header: 'When', cell: ({ row }) => <span className="text-muted-foreground">{new Date(row.getValue('updatedAt')).toLocaleString()}</span> },
-]
 
 const logout = () => { localStorage.removeItem('klread_session'); location.href = '/' }
 
-export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacherInitials }: {
-  teacherKey?: string; teacherStudentId?: string; teacherName?: string; teacherInitials?: string
+export function TeacherView({ teacherKey, teacherStudentId, teacherName }: {
+  teacherKey?: string; teacherStudentId?: string; teacherName?: string
 }) {
   const key = teacherKey ?? new URLSearchParams(location.search).get('key') ?? ''
   const k = encodeURIComponent(key)
@@ -52,7 +57,6 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   const [actNum, setActNum] = useState(1)
   const [sceneNum, setSceneNum] = useState(1)
   const [scrollProgress, setScrollProgress] = useState(0)
-  const [showVariants, setShowVariants] = useState(true)
   const [label, setLabel] = useState('')
   const [codeInput, setCodeInput] = useState('')
   const [creating, setCreating] = useState(false)
@@ -60,6 +64,56 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   const [newStudent, setNewStudent] = useState<Record<string, { name: string; initials: string }>>({})
   const [addingStudent, setAddingStudent] = useState<Record<string, boolean>>({})
   const [err, setErr] = useState('')
+  const [notesOpen, setNotesOpen] = useState(false)
+  const [editingNotes, setEditingNotes] = useState<Record<string, string>>({})
+
+  async function deleteNote(id: string) {
+    await fetch(`/api/notes?id=${id}`, { method: 'DELETE' })
+    setAllNotes(p => p.filter(n => n.id !== id))
+  }
+
+  async function saveNote(id: string) {
+    const body = editingNotes[id]?.trim()
+    if (!body) return
+    await fetch('/api/notes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, body }),
+    })
+    setAllNotes(p => p.map(n => n.id === id ? { ...n, body } : n))
+    setEditingNotes(p => { const c = { ...p }; delete c[id]; return c })
+  }
+
+  function renderNotes(notes: Note[]) {
+    if (!notes.length) return <p className="text-sm text-muted-foreground">No notes yet.</p>
+    return (
+      <div className="flex flex-col gap-2">
+        {notes.map(n => (
+          <div key={n.id} className="border-2 border-border rounded-base p-3 flex gap-3 items-start text-sm">
+            <span className="font-semibold shrink-0 w-20 truncate">{n.studentName}</span>
+            <span className="font-mono text-xs text-primary shrink-0 pt-0.5">{n.lineId}</span>
+            {n.id in editingNotes ? (
+              <div className="flex-1 grid gap-1">
+                <Textarea value={editingNotes[n.id]} onChange={e => setEditingNotes(p => ({ ...p, [n.id]: e.target.value }))} rows={2} className="resize-none" autoFocus />
+                <div className="flex gap-2">
+                  <button onClick={() => saveNote(n.id)} className="text-xs text-primary hover:underline">Save</button>
+                  <button onClick={() => setEditingNotes(p => { const c = { ...p }; delete c[n.id]; return c })} className="text-xs text-muted-foreground">Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <span className="flex-1 leading-relaxed">{n.body}</span>
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={() => setEditingNotes(p => ({ ...p, [n.id]: n.body }))} className="text-xs text-muted-foreground hover:text-foreground">Edit</button>
+                  <button onClick={() => deleteNote(n.id)} className="text-xs text-muted-foreground hover:text-destructive">Delete</button>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   useEffect(() => {
     const onScroll = () => {
@@ -121,6 +175,11 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
     setAddingStudent(p => ({ ...p, [joinCode]: false }))
   }
 
+  async function deleteStudent(studentId: string) {
+    await fetch(`/api/sessions?studentId=${studentId}&key=${k}`, { method: 'DELETE' })
+    setAllStudents(p => p.filter(s => s.studentId !== studentId))
+  }
+
   async function deleteCode(code: string) {
     await fetch(`/api/classes?key=${k}&code=${code}`, { method: 'DELETE' })
     setClasses(p => p.filter(c => c.joinCode !== code))
@@ -142,35 +201,38 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   if (reading) return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <div className="sticky top-0 z-10 bg-background">
-          <header className="border-b px-4 py-3 flex items-center gap-4">
-            <Button variant="neutral" size="sm" onClick={() => setReading(null)}>← Back</Button>
-            <span className="font-semibold text-sm shrink-0">{reading.label}</span>
-            <span className="flex items-center gap-3 text-xs font-semibold">
-              <span className="apparatus-quarto">‹ › Quarto 1608</span>
-              <span className="apparatus-folio">[ ] Folio 1623</span>
+        <ReadingHeader
+          left={
+            <span className="flex items-center gap-2">
+              <Button variant="neutral" size="sm" onClick={() => setReading(null)}>← Back</Button>
+              <span className="font-semibold text-sm">{reading.label}</span>
             </span>
-            <label className="flex items-center gap-2 text-sm cursor-pointer ml-auto">
-              <span className="text-muted-foreground">Highlight</span>
-              <Switch checked={showVariants} onCheckedChange={setShowVariants} />
-            </label>
-          </header>
-          <div className="border-b py-2 flex flex-col items-center gap-2">
-            <SceneNav acts={learData.acts as any} actNum={actNum} sceneNum={sceneNum} onGoTo={(a, s) => { setActNum(a); setSceneNum(s) }} />
-            <Progress value={scrollProgress} className="w-full rounded-none border-0 h-1" />
-          </div>
-        </div>
+          }
+          right={
+            <Button variant="neutral" size="sm" className="text-xs" onClick={() => setNotesOpen(true)}>Notes</Button>
+          }
+          acts={learData.acts as any}
+          actNum={actNum}
+          sceneNum={sceneNum}
+          onGoTo={(a, s) => { setActNum(a); setSceneNum(s) }}
+          scrollProgress={scrollProgress}
+        />
         <main className="px-2 py-4 sm:px-6">
           <TextReader
             acts={learData.acts as any}
-            showVariants={showVariants}
             studentId={teacherStudentId ?? ''}
             studentName={teacherName ?? ''}
-            initials={teacherInitials ?? ''}
             actNum={actNum}
             sceneNum={sceneNum}
           />
         </main>
+        <AllNotesSheet
+          studentId={teacherStudentId ?? ''}
+          joinCode={reading.joinCode}
+          open={notesOpen}
+          onOpenChange={setNotesOpen}
+          isTeacher
+        />
       </div>
     </TooltipProvider>
   )
@@ -178,11 +240,18 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
   const teacherNotes = allNotes.filter(n => !classes.some(c => c.joinCode === n.joinCode))
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Teacher view</h1>
-        <Button variant="neutral" size="sm" onClick={logout}>Log out</Button>
+    <div className="min-h-screen bg-background">
+      <div className="sticky top-0 z-10 bg-background">
+        <header className="border-b px-4 py-3 flex items-center gap-3">
+          <h1 className="flex-1 text-lg font-bold flex items-center gap-2">
+            <BrokenCrown className="w-8 h-8" />
+            King Lear <span className="text-main">Promptbook</span>
+          </h1>
+          <span className="text-xs font-semibold text-muted-foreground">Teacher</span>
+          <Button variant="neutral" size="sm" onClick={logout}>Log out</Button>
+        </header>
       </div>
+      <div className="max-w-4xl mx-auto p-6">
 
       <section className="mb-8">
         <h2 className="text-lg font-semibold mb-3">Class codes</h2>
@@ -231,9 +300,6 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
                 <AccordionContent>
                   <div className="flex gap-2 mb-4">
                     <Button size="sm" onClick={() => setReading({ joinCode: c.joinCode, label: c.label })}>Read</Button>
-                    <Button size="sm" variant="neutral" onClick={() => document.getElementById('notes-' + c.joinCode)?.scrollIntoView({ behavior: 'smooth' })}>
-                      View student notes
-                    </Button>
                     <button onClick={() => deleteCode(c.joinCode)} className="ml-auto text-xs text-muted-foreground hover:text-destructive">
                       Delete code
                     </button>
@@ -248,21 +314,19 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
                     <Input
                       placeholder="Initials"
                       value={newStudent[c.joinCode]?.initials ?? ''}
-                      onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], initials: e.target.value.toUpperCase().slice(0, 4) } }))}
+                      onChange={e => setNewStudent(p => ({ ...p, [c.joinCode]: { ...p[c.joinCode], initials: fmtInitials(e.target.value) } }))}
                       onKeyDown={e => e.key === 'Enter' && addStudent(c.joinCode)}
-                      className="w-20 shrink-0 uppercase"
-                      maxLength={4}
+                      className="w-20 shrink-0"
+                      maxLength={7}
                     />
                     <Button size="sm" onClick={() => addStudent(c.joinCode)} disabled={addingStudent[c.joinCode]}>
                       {addingStudent[c.joinCode] ? 'Adding…' : 'Add student'}
                     </Button>
                   </div>
-                  <DataTable columns={studentColumns} data={students} pageSize={10} />
+                  <DataTable columns={makeStudentColumns(deleteStudent)} data={students} pageSize={10} />
                   <div id={'notes-' + c.joinCode} className="mt-6">
                     <p className="text-sm font-semibold mb-3">Student notes</p>
-                    {notes.length
-                      ? <DataTable columns={noteColumns} data={notes} pageSize={20} />
-                      : <p className="text-sm text-muted-foreground">No notes yet.</p>}
+                    {renderNotes(notes)}
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -274,9 +338,10 @@ export function TeacherView({ teacherKey, teacherStudentId, teacherName, teacher
       {teacherNotes.length > 0 && (
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-3">Your notes</h2>
-          <DataTable columns={noteColumns} data={teacherNotes} pageSize={20} />
+          {renderNotes(teacherNotes)}
         </section>
       )}
+      </div>
     </div>
   )
 }

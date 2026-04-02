@@ -1,15 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Switch } from '@/components/ui/switch'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { BrokenCrown } from './components/BrokenCrown'
 import { TextReader } from './components/TextReader'
-import { SceneNav } from './components/SceneNav'
-import { Progress } from '@/components/ui/progress'
+import { SearchDialog } from './components/SearchDialog'
+import { LoginCard } from './components/LoginCard'
 import { TeacherView } from './components/TeacherView'
+import { ReadingHeader } from './components/ReadingHeader'
+import { AllNotesSheet } from './components/AllNotesSheet'
 import learData from './data/king-lear.json'
 
 type Session = {
@@ -34,11 +32,14 @@ export default function App() {
 
   const isTeacher = location.pathname === '/teacher'
   const [session, setSession] = useState<Session | null>(stored)
-  const [showVariants, setShowVariants] = useState(true)
   const [actNum, setActNum] = useState(1)
   const [sceneNum, setSceneNum] = useState(1)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [scrollToLineId, setScrollToLineId] = useState<string | undefined>()
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [notesOpen, setNotesOpen] = useState(false)
+  const [textSize, setTextSize] = useState<'base' | 'lg' | 'xl'>('base')
+  const sizes: ('base' | 'lg' | 'xl')[] = ['base', 'lg', 'xl']
   const [name, setName] = useState(() => lastUsed()?.name ?? '')
   const [code, setCode] = useState(() => lastUsed()?.code ?? '')
   const [initials, setInitials] = useState('')
@@ -56,12 +57,17 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setSearchOpen(true) }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
   function applyBookmark(lineId: string) {
     const [a, s] = lineId.split('.').map(Number)
-    if (a && s) {
-      setActNum(a)
-      setSceneNum(s)
-    }
+    if (a && s) { setActNum(a); setSceneNum(s) }
     setScrollToLineId(lineId)
   }
 
@@ -79,17 +85,23 @@ export default function App() {
   }, [session])
 
   useEffect(() => {
+    const goto = new URLSearchParams(location.search).get('goto')
+    if (goto && session) {
+      applyBookmark(goto)
+      const url = new URL(location.href)
+      url.searchParams.delete('goto')
+      history.replaceState(null, '', url)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!session) return
     const url = `/api/sessions?code=${encodeURIComponent(session.joinCode)}&name=${encodeURIComponent(session.studentName)}`
     fetch(url)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data) return
-        const updated: Session = {
-          ...session,
-          isTeacher: data.isTeacher ?? false,
-          bookmarkLineId: data.bookmarkLineId ?? session.bookmarkLineId,
-        }
+        const updated: Session = { ...session, isTeacher: data.isTeacher ?? false, bookmarkLineId: data.bookmarkLineId ?? session.bookmarkLineId }
         localStorage.setItem(KEY, JSON.stringify(updated))
         setSession(updated)
         if (data.bookmarkLineId) applyBookmark(data.bookmarkLineId)
@@ -116,12 +128,8 @@ export default function App() {
         data = await res.json()
       }
       const s: Session = {
-        studentId: data.studentId,
-        studentName: name.trim(),
-        joinCode: code.trim(),
-        initials: data.initials ?? '',
-        isTeacher: data.isTeacher ?? false,
-        bookmarkLineId: data.bookmarkLineId,
+        studentId: data.studentId, studentName: name.trim(), joinCode: code.trim(),
+        initials: data.initials ?? '', isTeacher: data.isTeacher ?? false, bookmarkLineId: data.bookmarkLineId,
       }
       localStorage.setItem(KEY, JSON.stringify(s))
       localStorage.setItem(LAST_KEY, JSON.stringify({ name: name.trim(), code: code.trim() }))
@@ -139,110 +147,95 @@ export default function App() {
       teacherKey={session?.joinCode ?? new URLSearchParams(location.search).get('key') ?? ''}
       teacherStudentId={session?.studentId}
       teacherName={session?.studentName}
-      teacherInitials={session?.initials}
     />
   )
 
+  const goTo = (a: number, s: number) => { setActNum(a); setSceneNum(s) }
   const logout = () => { localStorage.removeItem(KEY); setSession(null) }
 
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <div className="sticky top-0 z-10 bg-background">
-          <header className="border-b px-4 py-3 flex items-center justify-between gap-4">
-            <h1 className="text-lg font-bold shrink-0 flex items-center gap-2">
-              <BrokenCrown className="w-14 h-14" />
-              King Lear <span style={{ color: '#2b96e8' }}>Promptbook</span>
-            </h1>
-            {session && (
-              <span className="flex items-center gap-3 text-xs font-semibold">
-                <span className="apparatus-quarto">‹ › Quarto 1608</span>
-                <span className="apparatus-folio">[ ] Folio 1623</span>
+        {session ? (
+          <ReadingHeader
+            left={
+              <h1 className="text-lg font-bold flex items-center gap-2 flex-wrap">
+                <BrokenCrown className="w-8 h-8" />
+                King Lear <span className="text-main">Promptbook</span>
+              </h1>
+            }
+            right={
+              <span className="flex items-center gap-1">
+                <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'base'} onClick={() => setTextSize(s => sizes[sizes.indexOf(s) - 1])}>A−</Button>
+                <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'xl'} onClick={() => setTextSize(s => sizes[sizes.indexOf(s) + 1])}>A+</Button>
+                <Button onClick={() => setNotesOpen(true)} variant="neutral" size="sm" className="text-xs">Notes</Button>
+                <Button onClick={() => setSearchOpen(true)} variant="neutral" size="sm" className="text-xs">Search</Button>
+                <Button onClick={logout} variant="neutral" size="sm" className="text-xs">Log out</Button>
               </span>
-            )}
-            <div className="flex items-center gap-3 shrink-0">
-              {session && (
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <span className="text-muted-foreground">Highlight</span>
-                  <Switch checked={showVariants} onCheckedChange={setShowVariants} />
-                </label>
-              )}
-              {session && (
-                <Button onClick={logout} variant="neutral" size="sm" className="text-xs">
-                  Log out
-                </Button>
-              )}
-            </div>
-          </header>
-          {session && (
-            <div className="border-b py-2 flex flex-col items-center gap-2">
-              <SceneNav
-                acts={learData.acts as any}
-                actNum={actNum}
-                sceneNum={sceneNum}
-                onGoTo={(a, s) => { setActNum(a); setSceneNum(s) }}
-              />
-              <Progress value={scrollProgress} className="w-full rounded-none border-0 h-1" />
-            </div>
-          )}
-        </div>
-        <main className="px-2 py-4 sm:px-6">
+            }
+            acts={learData.acts as any}
+            actNum={actNum}
+            sceneNum={sceneNum}
+            onGoTo={goTo}
+            scrollProgress={scrollProgress}
+          />
+        ) : (
+          <div className="sticky top-0 z-10 bg-background">
+            <header className="border-b px-4 py-3">
+              <h1 className="text-lg font-bold flex items-center gap-2">
+                <BrokenCrown className="w-8 h-8" />
+                King Lear <span className="text-main">Promptbook</span>
+              </h1>
+            </header>
+          </div>
+        )}
+        <main className="px-2 py-4 sm:px-6 pb-20 sm:pb-4">
           {session ? (
             <TextReader
               acts={learData.acts as any}
-              showVariants={showVariants}
               studentId={session.studentId}
               studentName={session.studentName}
-              initials={session.initials}
               actNum={actNum}
               sceneNum={sceneNum}
               onBookmark={saveBookmark}
               scrollToLineId={scrollToLineId}
+              onGoTo={goTo}
+              textSize={textSize}
             />
           ) : (
-            <div className="flex items-center justify-center py-16">
-              <Card className="w-full max-w-lg">
-                <CardHeader><CardTitle>Mark it, nuncle.</CardTitle></CardHeader>
-                <CardContent className="grid gap-6">
-                  <div className="flex flex-row items-center gap-2">
-                    <Input
-                      placeholder="your first name"
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && join()}
-                    />
-                    <Input
-                      placeholder="class code"
-                      value={code}
-                      onChange={e => setCode(e.target.value.toUpperCase())}
-                      onKeyDown={e => e.key === 'Enter' && join()}
-                    />
-                    <Button className="italic shrink-0" onClick={join} disabled={loading}>
-                      {name.trim() ? `Enter ${name.trim().split(' ')[0].toUpperCase()}, at side.` : 'Enter...'}
-                    </Button>
-                  </div>
-                  {isNew && (
-                    <div className="grid gap-3">
-                      <Label htmlFor="login-initials">Initials</Label>
-                      <Input
-                        id="login-initials"
-                        placeholder="e.g. BH"
-                        value={initials}
-                        onChange={e => setInitials(e.target.value.toUpperCase().slice(0, 4))}
-                        onKeyDown={e => e.key === 'Enter' && join()}
-                        className="uppercase"
-                        maxLength={4}
-                        autoFocus
-                      />
-                    </div>
-                  )}
-                  {err && <p className="text-destructive text-sm">{err}</p>}
-                </CardContent>
-              </Card>
-            </div>
+            <LoginCard
+              name={name} setName={setName}
+              code={code} setCode={setCode}
+              initials={initials} setInitials={setInitials}
+              isNew={isNew} loading={loading} err={err}
+              onJoin={join}
+            />
           )}
         </main>
       </div>
+      {session && (
+        <div className="sm:hidden fixed bottom-0 inset-x-0 z-10 bg-background border-t flex items-center justify-around px-4 py-2">
+          <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'base'} onClick={() => setTextSize(s => sizes[sizes.indexOf(s) - 1])}>A−</Button>
+          <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'xl'} onClick={() => setTextSize(s => sizes[sizes.indexOf(s) + 1])}>A+</Button>
+          <Button onClick={() => setNotesOpen(true)} variant="neutral" size="sm" className="text-xs">Notes</Button>
+          <Button onClick={() => setSearchOpen(true)} variant="neutral" size="sm" className="text-xs">Search</Button>
+          <Button onClick={logout} variant="neutral" size="sm" className="text-xs">Log out</Button>
+        </div>
+      )}
+      {session && (
+        <AllNotesSheet
+          studentId={session.studentId}
+          joinCode={session.joinCode}
+          open={notesOpen}
+          onOpenChange={setNotesOpen}
+        />
+      )}
+      <SearchDialog
+        acts={learData.acts as any}
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onNavigate={(a, s, lineId) => { goTo(a, s); setSearchOpen(false); setTimeout(() => setScrollToLineId(lineId), 150) }}
+      />
     </TooltipProvider>
   )
 }
