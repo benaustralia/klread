@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { neon } from '@neondatabase/serverless'
 
 const sql = neon(process.env.DATABASE_URL!)
+const auth = (key: unknown) => (key as string) === process.env.TEACHER_KEY?.trim()
+const fmtInitials = (v: string) => v.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4).split('').join('.')
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Idempotent migration — no-op after first run
@@ -46,12 +48,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       resolvedInitials = existing[0]?.initials ?? ''
     }
     if (!resolvedInitials) return res.status(422).json({ error: 'initials required', needsInitials: true })
+    resolvedInitials = fmtInitials(resolvedInitials)
     const rows = await sql`
       INSERT INTO sessions (student_name, join_code, initials)
       VALUES (${studentName}, ${joinCode}, ${resolvedInitials})
       ON CONFLICT (student_name, join_code) DO UPDATE SET initials = EXCLUDED.initials
       RETURNING student_id AS "studentId", initials`
     return res.json({ ...rows[0], isTeacher: cls[0].is_teacher ?? false })
+  }
+
+  if (req.method === 'DELETE') {
+    if (!auth(req.query.key)) return res.status(403).end()
+    const studentId = req.query.studentId as string
+    if (!studentId) return res.status(400).json({ error: 'studentId required' })
+    await sql`DELETE FROM notes WHERE student_id = ${studentId}`
+    await sql`DELETE FROM sessions WHERE student_id = ${studentId}`
+    return res.status(204).end()
   }
 
   res.status(405).end()

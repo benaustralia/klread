@@ -18,7 +18,7 @@
   --background: oklch(93.46% 0.0304 254.32);
   --foreground: oklch(0% 0 0);
   --main: oklch(67.47% 0.1725 259.61);
-  --main-foreground: oklch(0% 0 0);
+  --main-foreground: oklch(100% 0 0);
   --secondary-background: oklch(100% 0 0);
   --border: oklch(0% 0 0);
   --ring: oklch(0% 0 0);
@@ -88,6 +88,7 @@
 
 @layer base {
   * { @apply border-border outline-ring/50; }
+  html { overflow-anchor: none; scrollbar-gutter: stable; }
   body {
     @apply bg-background text-foreground font-base;
     font-family: 'DM Sans', sans-serif;
@@ -104,10 +105,10 @@
 
 @layer components {
   .apparatus-quarto {
-    @apply bg-sky-200 border-l-2 border-sky-400 px-2 py-0.5 text-black text-xs font-semibold;
+    @apply bg-sky-200 border-l-2 border-sky-400 px-2 py-1 text-black text-sm font-semibold rounded-sm;
   }
   .apparatus-folio {
-    @apply bg-yellow-200 border-l-2 border-yellow-400 px-2 py-0.5 text-black text-xs font-semibold;
+    @apply bg-yellow-200 border-l-2 border-yellow-400 px-2 py-1 text-black text-sm font-semibold rounded-sm;
   }
   .speaker-label {
     @apply mt-4 mb-1 text-xs uppercase tracking-widest font-bold border-b pb-1;

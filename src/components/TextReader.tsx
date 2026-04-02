@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { LineRenderer, type Line, type NotePosition } from './LineRenderer'
+import { LineRenderer, type Line, type Highlight } from './LineRenderer'
 import { NotesSheet } from './NotesSheet'
+import { SceneEndNav } from './SceneEndNav'
 
 export type SceneData = { num: number; lines: Line[]; location?: string; synopsis?: string }
 export type ActData = { num: number; scenes: SceneData[] }
@@ -26,46 +27,69 @@ const SHORT: Record<string, string> = {
 }
 export function shortLocation(loc: string) { return SHORT[loc] ?? loc }
 
-type Annotation = { pos: NotePosition; anchor: string; initials?: string }
+type NoteRaw = { lineId: string; lineIdTo?: string; charStart?: number; charEnd?: number }
+type TeacherNoteRaw = NoteRaw & { initials?: string }
 
-function buildAnnotationMap(
-  notes: { lineId: string; lineIdTo?: string; initials?: string }[],
-  allLineIds: string[]
-): Map<string, Annotation> {
-  const map = new Map<string, Annotation>()
+function buildHighlightMap(notes: NoteRaw[], allLineIds: string[]): Map<string, Highlight[]> {
+  const map = new Map<string, Highlight[]>()
+  const add = (id: string, h: Highlight) => { map.set(id, [...(map.get(id) ?? []), h]) }
   for (const n of notes) {
-    if (n.lineIdTo && n.lineIdTo !== n.lineId) {
+    const anchor = n.lineId
+    if (n.charStart !== undefined && n.charEnd !== undefined) {
+      add(n.lineId, { charStart: n.charStart, charEnd: n.charEnd, anchor })
+    } else if (n.lineIdTo && n.lineIdTo !== n.lineId) {
       const from = allLineIds.indexOf(n.lineId)
       const to = allLineIds.indexOf(n.lineIdTo)
-      if (from !== -1 && to !== -1) {
-        allLineIds.slice(from, to + 1).forEach((id, i, arr) => {
-          const pos: NotePosition = i === 0 ? 'start' : i === arr.length - 1 ? 'end' : 'mid'
-          if (!map.has(id) || pos === 'start') map.set(id, { pos, anchor: n.lineId, initials: n.initials })
-        })
-      }
+      if (from !== -1 && to !== -1)
+        allLineIds.slice(from, to + 1).forEach(id => add(id, { anchor }))
     } else {
-      if (!map.has(n.lineId)) map.set(n.lineId, { pos: 'solo', anchor: n.lineId, initials: n.initials })
+      add(n.lineId, { anchor })
     }
   }
   return map
 }
 
-export function TextReader({ acts, showVariants, studentId, studentName, initials, actNum, sceneNum, onBookmark, scrollToLineId }: {
+// Detect which line was selected and compute char offsets within line.text
+function getSelection(): { lineId: string; charStart: number; charEnd: number } | null {
+  const sel = window.getSelection()
+  if (!sel || sel.isCollapsed) return null
+  const raw = sel.toString()
+  if (!raw.trim()) return null
+
+  let el: Element | null = sel.getRangeAt(0).commonAncestorContainer as Element
+  if (el.nodeType === Node.TEXT_NODE) el = el.parentElement
+  while (el && !el.hasAttribute?.('data-line-id')) el = el.parentElement
+  if (!el) return null
+
+  const lineId = el.getAttribute('data-line-id')!
+  const textSpan = el.querySelector('[data-line-text]')
+  if (!textSpan) return null
+  const lineText = textSpan.textContent ?? ''
+  const trimmed = raw.trim()
+  const charStart = lineText.indexOf(trimmed)
+  if (charStart === -1) return null
+  return { lineId, charStart, charEnd: charStart + trimmed.length }
+}
+
+export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onBookmark, scrollToLineId, onGoTo, textSize = 'base' }: {
   acts: ActData[]
-  showVariants: boolean
   studentId: string
   studentName: string
-  initials: string
   actNum: number
   sceneNum: number
   onBookmark?: (lineId: string) => void
   scrollToLineId?: string
+  onGoTo?: (a: number, s: number) => void
+  textSize?: 'base' | 'lg' | 'xl'
 }) {
   const [selected, setSelected] = useState<Line | null>(null)
+  const [selectionRange, setSelectionRange] = useState<{ charStart: number; charEnd: number } | undefined>()
   const [open, setOpen] = useState(false)
-  const [annotated, setAnnotated] = useState<Map<string, Annotation>>(new Map())
-  const [teacherAnnotated, setTeacherAnnotated] = useState<Map<string, Annotation>>(new Map())
+  const [highlights, setHighlights] = useState<Map<string, Highlight[]>>(new Map())
+  const [teacherHighlights, setTeacherHighlights] = useState<Map<string, Highlight[]>>(new Map())
+  const [refreshKey, setRefreshKey] = useState(0)
   const scrolledRef = useRef(false)
+  const selectionHandledRef = useRef(false)
 
   const allLineIds = useMemo(() => acts.flatMap(a => a.scenes.flatMap(s => s.lines.map(l => l.id))), [acts])
   const allLines = useMemo(() => acts.flatMap(a => a.scenes.flatMap(s => s.lines)), [acts])
@@ -73,26 +97,22 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
   useEffect(() => {
     fetch(`/api/notes?studentId=${studentId}`)
       .then(r => r.json())
-      .then((notes: { lineId: string; lineIdTo?: string }[]) => setAnnotated(buildAnnotationMap(notes, allLineIds)))
+      .then((notes: NoteRaw[]) => setHighlights(buildHighlightMap(notes, allLineIds)))
       .catch(() => {})
-  }, [studentId])
+  }, [studentId, refreshKey])
 
   useEffect(() => {
     fetch('/api/notes?teacherNotes=1')
       .then(r => r.json())
-      .then((notes: { lineId: string; lineIdTo?: string; initials: string }[]) => setTeacherAnnotated(buildAnnotationMap(notes, allLineIds)))
+      .then((notes: TeacherNoteRaw[]) => setTeacherHighlights(buildHighlightMap(notes, allLineIds)))
       .catch(() => {})
-  }, [])
+  }, [refreshKey])
 
   useEffect(() => { if (scrollToLineId) scrolledRef.current = false }, [scrollToLineId])
-
   useEffect(() => {
     if (!scrollToLineId || scrolledRef.current) return
     const el = document.querySelector(`[data-line-id="${scrollToLineId}"]`)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      scrolledRef.current = true
-    }
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); scrolledRef.current = true }
   })
 
   const bookmarkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -117,18 +137,39 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
     return () => { document.title = 'King Lear Promptbook' }
   }, [actNum, sceneNum])
 
-  function onNotesSaved(lineId: string) {
-    setAnnotated(prev => {
-      if (prev.has(lineId)) return prev
-      return new Map(prev).set(lineId, { pos: 'solo', anchor: lineId })
-    })
+  // Detect text selection on pointer release — opens NotesSheet with selection pre-loaded.
+  // Sets selectionHandledRef so the subsequent click event doesn't clobber the char range.
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    selectionHandledRef.current = false
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+    const sel = getSelection()
+    if (!sel) return
+    const line = allLines.find(l => l.id === sel.lineId)
+    if (!line) return
+    selectionHandledRef.current = true
+    setSelected(line)
+    setSelectionRange({ charStart: sel.charStart, charEnd: sel.charEnd })
+    setOpen(true)
+    window.getSelection()?.removeAllRanges()
+  }, [allLines])
+
+  function openNote(line: Line) {
+    if (selectionHandledRef.current) return  // selection already handled this event cycle
+    setSelected(line)
+    setSelectionRange(undefined)
+    setOpen(true)
+  }
+
+  function openHighlightNote(anchor: string) {
+    const line = allLines.find(l => l.id === anchor)
+    if (line) { setSelected(line); setSelectionRange(undefined); setOpen(true) }
   }
 
   const currentScene = acts.find(a => a.num === actNum)?.scenes.find(s => s.num === sceneNum)
 
   return (
     <>
-      <div className="max-w-2xl mx-auto py-4">
+      <div className={`max-w-3xl mx-auto py-4 ${{ base: '', lg: 'text-lg', xl: 'text-xl' }[textSize]}`} onPointerUp={handlePointerUp}>
         {currentScene?.location && (
           <div className="mb-6 border-b pb-4">
             <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1">
@@ -144,6 +185,10 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
           const isStage = line.type === 'stage'
           const showSpk = !isStage && line.speaker && line.speaker !== acc.last
           if (!isStage) acc.last = line.speaker
+          const lineHighlights = [
+            ...(highlights.get(line.id) ?? []),
+            ...(teacherHighlights.get(line.id) ?? []),
+          ]
           acc.el.push(
             <div key={line.id} data-line-id={!isStage ? line.id : undefined}>
               {showSpk && <p className="speaker-label">{line.speaker}</p>}
@@ -153,27 +198,15 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
                   ))
                 : <LineRenderer
                     line={line}
-                    showVariants={showVariants}
-                    initials={initials}
-                    notePosition={annotated.get(line.id)?.pos}
-                    onBadgeClick={annotated.has(line.id) ? () => {
-                      const anchor = annotated.get(line.id)!.anchor
-                      setSelected(allLines.find(x => x.id === anchor) ?? line)
-                      setOpen(true)
-                    } : undefined}
-                    teacherInitials={teacherAnnotated.get(line.id)?.initials}
-                    teacherNotePosition={teacherAnnotated.get(line.id)?.pos}
-                    onTeacherBadgeClick={teacherAnnotated.has(line.id) ? () => {
-                      const anchor = teacherAnnotated.get(line.id)!.anchor
-                      setSelected(allLines.find(x => x.id === anchor) ?? line)
-                      setOpen(true)
-                    } : undefined}
-                    onClick={l => { setSelected(l); setOpen(true) }}
+                    highlights={lineHighlights}
+                    onHighlightClick={openHighlightNote}
+                    onClick={openNote}
                   />}
             </div>
           )
           return acc
         }, { el: [], last: undefined }).el}
+        {onGoTo && <SceneEndNav acts={acts} actNum={actNum} sceneNum={sceneNum} onGoTo={onGoTo} />}
       </div>
       <NotesSheet
         line={selected}
@@ -182,7 +215,9 @@ export function TextReader({ acts, showVariants, studentId, studentName, initial
         onOpenChange={setOpen}
         studentId={studentId}
         studentName={studentName}
-        onSaved={onNotesSaved}
+        charStart={selectionRange?.charStart}
+        charEnd={selectionRange?.charEnd}
+        onSaved={() => setRefreshKey(k => k + 1)}
       />
     </>
   )

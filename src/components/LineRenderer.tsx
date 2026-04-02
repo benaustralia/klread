@@ -1,13 +1,19 @@
 import { TextALeft, TextARight, TextBLeft, TextBRight } from './brackets'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
+export type Variant = { type: 'a' | 'b'; charStart: number; charEnd: number }
+
 export type Line = {
   id: string; ftln?: number; act: number; scene: number
   speaker?: string; text: string; ana?: 'verse' | 'prose' | 'short'
-  texta?: true; textb?: true; type?: 'stage'; stageType?: string; inline?: boolean
+  variants?: Variant[]; type?: 'stage'; stageType?: string; inline?: boolean
 }
 
-export type NotePosition = 'solo' | 'start' | 'mid' | 'end'
+export type Highlight = {
+  charStart?: number  // undefined = whole line
+  charEnd?: number
+  anchor: string      // lineId to open in NotesSheet on click
+}
 
 function BracketTip({ children, label }: { children: React.ReactNode; label: string }) {
   return (
@@ -18,80 +24,101 @@ function BracketTip({ children, label }: { children: React.ReactNode; label: str
   )
 }
 
-function makeBadge(initials: string, pos: NotePosition, primary: boolean, onClick?: (e: React.MouseEvent) => void): React.ReactNode {
-  const base = `text-xs font-semibold border-border ${primary ? 'text-primary' : 'text-muted-foreground'}`
-  const clickable = onClick ? 'cursor-pointer hover:opacity-70' : ''
-  const handle = onClick ? (e: React.MouseEvent) => { e.stopPropagation(); onClick(e) } : undefined
-  if (pos === 'solo') return (
-    <span data-badge className={`${base} ${clickable} border rounded px-1 shrink-0 self-stretch flex items-center ${primary ? '' : 'bg-secondary-background'}`} onClick={handle}>
-      {initials}
-    </span>
-  )
-  if (pos === 'start') return (
-    <span data-badge className={`${base} ${clickable} border border-b-0 rounded-t px-1 shrink-0 self-stretch flex items-center`} onClick={handle}>
-      {initials}
-    </span>
-  )
-  if (pos === 'mid') return (
-    <span data-badge className={`${base} ${clickable} text-transparent border-x px-1 shrink-0 self-stretch select-none`} onClick={handle}>
-      {initials}
-    </span>
-  )
-  return (
-    <span data-badge className={`${base} ${clickable} text-transparent border border-t-0 rounded-b px-1 shrink-0 self-stretch select-none`} onClick={handle}>
-      {initials}
-    </span>
-  )
+function renderText(
+  text: string,
+  highlights: Highlight[],
+  variants: Variant[],
+  onHighlightClick: (anchor: string) => void
+): React.ReactNode {
+  // Collect all breakpoints from highlights and variants
+  const breaks = new Set<number>([0, text.length])
+  for (const h of highlights) { breaks.add(h.charStart ?? 0); breaks.add(h.charEnd ?? text.length) }
+  for (const v of variants) { breaks.add(v.charStart); breaks.add(v.charEnd) }
+
+  const sorted = [...breaks].sort((a, b) => a - b)
+
+  if (sorted.length === 2 && !variants.length && !highlights.length) {
+    return <span data-line-text>{text}</span>
+  }
+
+  const parts: React.ReactNode[] = []
+
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const start = sorted[i]
+    const end = sorted[i + 1]
+
+    // Opening brackets for variants starting at this position
+    for (const v of variants) {
+      if (v.charStart === start) {
+        const label = v.type === 'a'
+          ? 'Quarto 1608 only — not found in the Folio'
+          : 'Folio 1623 only — not found in the First Quarto'
+        parts.push(
+          <BracketTip key={`bl${start}-${v.type}`} label={label}>
+            <span className={`inline align-baseline mr-0.5 ${v.type === 'a' ? 'text-sky-600' : 'text-yellow-700'}`}>
+              {v.type === 'a' ? <TextALeft /> : <TextBLeft />}
+            </span>
+          </BracketTip>
+        )
+      }
+    }
+
+    const seg = text.slice(start, end)
+    const variant = variants.find(v => v.charStart <= start && v.charEnd >= end)
+    const highlight = highlights.find(h => (h.charStart ?? 0) <= start && (h.charEnd ?? text.length) >= end)
+
+    const variantClass = variant ? (variant.type === 'a' ? 'bg-sky-200' : 'bg-yellow-200') : ''
+    const highlightClass = highlight ? 'bg-main/25 rounded-sm cursor-pointer hover:bg-main/40 not-italic' : ''
+    const className = [variantClass, highlightClass].filter(Boolean).join(' ')
+
+    if (highlight) {
+      parts.push(
+        <mark key={`s${i}`} className={className}
+          onClick={e => { e.stopPropagation(); onHighlightClick(highlight.anchor) }}>
+          {seg}
+        </mark>
+      )
+    } else if (className) {
+      parts.push(<span key={`s${i}`} className={className}>{seg}</span>)
+    } else {
+      parts.push(seg)
+    }
+
+    // Closing brackets for variants ending at this position
+    for (const v of variants) {
+      if (v.charEnd === end) {
+        parts.push(
+          <span key={`br${end}-${v.type}`}
+            className={`inline align-baseline ml-0.5 ${v.type === 'a' ? 'text-sky-600' : 'text-yellow-700'}`}>
+            {v.type === 'a' ? <TextARight /> : <TextBRight />}
+          </span>
+        )
+      }
+    }
+  }
+
+  return <span data-line-text>{parts}</span>
 }
 
-export function LineRenderer({ line, showVariants, initials, notePosition, onBadgeClick, teacherInitials, teacherNotePosition, onTeacherBadgeClick, onClick }: {
+export function LineRenderer({ line, highlights = [], onHighlightClick, onClick }: {
   line: Line
-  showVariants: boolean
-  initials?: string
-  notePosition?: NotePosition
-  onBadgeClick?: () => void
-  teacherInitials?: string
-  teacherNotePosition?: NotePosition
-  onTeacherBadgeClick?: () => void
+  highlights?: Highlight[]
+  onHighlightClick: (anchor: string) => void
   onClick: (l: Line) => void
 }) {
-  const highlight = !showVariants ? ''
-    : line.textb ? 'bg-yellow-200 border-l-2 border-yellow-400 pl-1'
-    : line.texta ? 'bg-sky-200 border-l-2 border-sky-400 pl-1'
-    : ''
+  const variants = line.variants ?? []
 
   return (
     <div
-      className={`flex gap-3 items-stretch cursor-pointer hover:bg-black/5 [&:has([data-badge]:hover)]:bg-transparent px-2 rounded transition-colors ${highlight}`}
+      className="flex gap-3 items-center cursor-pointer hover:bg-secondary-background px-2 rounded-base transition-colors"
       onClick={() => onClick(line)}
     >
-      <span className="text-xs text-gray-400 select-none w-16 shrink-0 text-right font-mono py-0.5 self-center">
+      <span className="text-xs text-muted-foreground select-none w-[7ch] shrink-0 text-right font-mono self-center py-0.5">
         {line.id}
       </span>
-      <span className="leading-relaxed flex-1 py-0.5" style={line.ana !== 'prose' ? { paddingLeft: '1.5rem' } : undefined}>
-        {line.texta && (
-          <BracketTip label="Q1 only — text from the First Quarto not found in the Folio">
-            <span className="inline align-baseline text-sky-600 mr-0.5"><TextALeft /></span>
-          </BracketTip>
-        )}
-        {line.textb && (
-          <BracketTip label="Folio only — text from the Folio not found in the First Quarto">
-            <span className="inline align-baseline text-yellow-700 mr-0.5"><TextBLeft /></span>
-          </BracketTip>
-        )}
-        {line.text}
-        {line.texta && <span className="inline align-baseline text-sky-600 ml-0.5"><TextARight /></span>}
-        {line.textb && <span className="inline align-baseline text-yellow-700 ml-0.5"><TextBRight /></span>}
+      <span className={`leading-relaxed flex-1 py-0.5 ${line.ana !== 'prose' ? 'pl-6' : ''}`}>
+        {renderText(line.text, highlights, variants, onHighlightClick)}
       </span>
-      {((teacherInitials && teacherNotePosition) || notePosition) && (
-        <span className="flex gap-1 shrink-0 self-stretch items-stretch">
-          {teacherInitials && teacherNotePosition && makeBadge(teacherInitials, teacherNotePosition, false, onTeacherBadgeClick)}
-          {notePosition
-            ? makeBadge(initials!, notePosition, true, onBadgeClick)
-            : teacherInitials && <span className="px-1 text-xs invisible select-none self-stretch">{initials}</span>
-          }
-        </span>
-      )}
     </div>
   )
 }
