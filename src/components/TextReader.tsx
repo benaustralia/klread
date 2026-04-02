@@ -55,10 +55,11 @@ function getSelection(): { lineId: string; charStart: number; charEnd: number } 
   return start === -1 ? null : { lineId: el.getAttribute('data-line-id')!, charStart: start, charEnd: start + trimmed.length }
 }
 
-export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onBookmark, scrollToLineId, onGoTo, textSize = 'base' }: {
+export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onBookmark, scrollToLineId, onGoTo, textSize = 'base', joinCode, isTeacher }: {
   acts: ActData[]; studentId: string; studentName: string
   actNum: number; sceneNum: number; onBookmark?: (lineId: string) => void
   scrollToLineId?: string; onGoTo?: (a: number, s: number) => void; textSize?: 'base' | 'lg' | 'xl'
+  joinCode?: string; isTeacher?: boolean
 }) {
   const [selected, setSelected] = useState<Line | null>(null)
   const [selRange, setSelRange] = useState<{ charStart: number; charEnd: number } | undefined>()
@@ -79,7 +80,8 @@ export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onB
   }, [studentId, refreshKey])
 
   useEffect(() => {
-    fetch('/api/notes?teacherNotes=1').then(r => r.json())
+    const qs = joinCode ? `&forClass=${encodeURIComponent(joinCode)}` : ''
+    fetch(`/api/notes?teacherNotes=1${qs}`).then(r => r.json())
       .then((n: NoteRaw[]) => setTeacherHl(buildHighlightMap(n, allLineIds))).catch(() => {})
   }, [refreshKey])
 
@@ -161,7 +163,7 @@ export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onB
         {onGoTo && <SceneEndNav acts={acts} actNum={actNum} sceneNum={sceneNum} onGoTo={onGoTo} />}
       </div>
       <NotesSheet line={selected} allLines={allLines} open={open} onOpenChange={setOpen}
-        studentId={studentId} studentName={studentName}
+        studentId={studentId} studentName={studentName} joinCode={joinCode} isTeacher={isTeacher}
         charStart={selRange?.charStart} charEnd={selRange?.charEnd} onSaved={() => setRefreshKey(k => k + 1)} />
     </>
   )

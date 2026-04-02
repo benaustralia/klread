@@ -6,6 +6,7 @@ const sql = neon(process.env.DATABASE_URL!)
 async function migrate() {
   await sql`ALTER TABLE notes ADD COLUMN IF NOT EXISTS char_start INT`
   await sql`ALTER TABLE notes ADD COLUMN IF NOT EXISTS char_end INT`
+  await sql`ALTER TABLE notes ADD COLUMN IF NOT EXISTS class_code TEXT`
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -13,27 +14,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'GET') {
     if (req.query.teacherNotes) {
-      const rows = await sql`
-        SELECT n.id, n.line_id AS "lineId", n.line_id_to AS "lineIdTo",
-               n.char_start AS "charStart", n.char_end AS "charEnd",
-               n.body, n.act, n.scene, s.initials, s.student_name AS "studentName"
-        FROM notes n
-        JOIN sessions s ON s.student_id = n.student_id
-        JOIN classes c ON c.join_code = s.join_code
-        WHERE c.is_teacher = true
-        ORDER BY n.updated_at DESC`
+      const forClass = req.query.forClass as string | undefined
+      const rows = forClass
+        ? await sql`
+          SELECT n.id, n.line_id AS "lineId", n.line_id_to AS "lineIdTo",
+                 n.char_start AS "charStart", n.char_end AS "charEnd",
+                 n.body, n.act, n.scene, n.class_code AS "classCode",
+                 s.initials, s.student_name AS "studentName"
+          FROM notes n
+          JOIN sessions s ON s.student_id = n.student_id
+          JOIN classes c ON c.join_code = s.join_code
+          WHERE c.is_teacher = true AND (n.class_code IS NULL OR n.class_code = ${forClass})
+          ORDER BY n.updated_at DESC`
+        : await sql`
+          SELECT n.id, n.line_id AS "lineId", n.line_id_to AS "lineIdTo",
+                 n.char_start AS "charStart", n.char_end AS "charEnd",
+                 n.body, n.act, n.scene, n.class_code AS "classCode",
+                 s.initials, s.student_name AS "studentName"
+          FROM notes n
+          JOIN sessions s ON s.student_id = n.student_id
+          JOIN classes c ON c.join_code = s.join_code
+          WHERE c.is_teacher = true AND n.class_code IS NULL
+          ORDER BY n.updated_at DESC`
       return res.json(rows)
     }
     if (req.query.joinCode) {
+      const jc = req.query.joinCode as string
       const rows = await sql`
         SELECT n.id, n.student_id AS "studentId", n.student_name AS "studentName",
                n.line_id AS "lineId", n.line_id_to AS "lineIdTo",
                n.char_start AS "charStart", n.char_end AS "charEnd",
-               n.body, n.updated_at AS "updatedAt", s.initials
+               n.body, n.updated_at AS "updatedAt", n.class_code AS "classCode", s.initials
         FROM notes n
         JOIN sessions s ON s.student_id = n.student_id
         JOIN classes c ON c.join_code = s.join_code
-        WHERE s.join_code = ${req.query.joinCode as string} OR c.is_teacher = true
+        WHERE s.join_code = ${jc}
+           OR (c.is_teacher = true AND (n.class_code IS NULL OR n.class_code = ${jc}))
         ORDER BY n.updated_at DESC`
       return res.json(rows)
     }
@@ -50,12 +66,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'POST') {
-    const { studentId, studentName, lineId, lineIdTo, charStart, charEnd, act, scene, body } = req.body ?? {}
+    const { studentId, studentName, lineId, lineIdTo, charStart, charEnd, act, scene, body, classCode } = req.body ?? {}
     if (!studentId || !lineId || !body) return res.status(400).json({ error: 'studentId, lineId, body required' })
     const rows = await sql`
-      INSERT INTO notes (student_id, student_name, line_id, line_id_to, char_start, char_end, act, scene, body)
+      INSERT INTO notes (student_id, student_name, line_id, line_id_to, char_start, char_end, act, scene, body, class_code)
       VALUES (${studentId}, ${studentName}, ${lineId}, ${lineIdTo ?? null},
-              ${charStart ?? null}, ${charEnd ?? null}, ${act}, ${scene}, ${body})
+              ${charStart ?? null}, ${charEnd ?? null}, ${act}, ${scene}, ${body}, ${classCode ?? null})
       RETURNING id, updated_at AS "updatedAt"`
     return res.json(rows[0])
   }

@@ -150,7 +150,7 @@ export default function App() {
           {session && learData
             ? <TextReader acts={learData.acts as any} studentId={session.studentId} studentName={session.studentName}
                 actNum={actNum} sceneNum={sceneNum} onBookmark={saveBookmark}
-                scrollToLineId={scrollToLineId} onGoTo={goTo} textSize={textSize} />
+                scrollToLineId={scrollToLineId} onGoTo={goTo} textSize={textSize} joinCode={session.joinCode} />
             : session
               ? <p className="text-center text-muted-foreground py-8">Loading play text…</p>
               : <LoginCard name={name} setName={setName} code={code} setCode={setCode}

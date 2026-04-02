@@ -27,7 +27,8 @@ export function TeacherReading({ teacherStudentId, teacherName }: {
           onGoTo={(a, sc) => s.set({ actNum: a, sceneNum: sc })} scrollProgress={scrollProgress} />
         <main className="px-2 py-4 sm:px-6">
           <TextReader acts={learData.acts as any} studentId={teacherStudentId ?? ''}
-            studentName={teacherName ?? ''} actNum={s.actNum} sceneNum={s.sceneNum} />
+            studentName={teacherName ?? ''} actNum={s.actNum} sceneNum={s.sceneNum}
+            joinCode={s.reading?.joinCode} isTeacher />
         </main>
         <AllNotesSheet studentId={teacherStudentId ?? ''} joinCode={s.reading.joinCode}
           open={s.notesOpen} onOpenChange={v => s.set({ notesOpen: v })} isTeacher />

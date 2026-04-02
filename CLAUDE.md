@@ -47,7 +47,7 @@ Exception: the textual apparatus (Quarto/Folio variant highlighting) uses `bg-sk
 ```sql
 classes    (join_code PK, label, is_teacher bool, created_at)
 sessions   (student_id uuid PK, student_name, join_code FK, initials, last_seen_at, bookmark_line_id)
-notes      (id uuid PK, student_id FK, student_name, line_id, line_id_to, act, scene, body, updated_at)
+notes      (id uuid PK, student_id FK, student_name, line_id, line_id_to, act, scene, body, updated_at, char_start, char_end, class_code)
 ```
 
 ## API routes
@@ -101,6 +101,9 @@ SearchDialog.tsx         — Cmd+K full-text line search
 ### Data model
 - A note has `lineId` (anchor/start) and optional `lineIdTo` (end of range). If both are the same, stored as null.
 - Notes are per-student. Teacher notes are notes saved under a session in a class where `is_teacher = true`.
+- Teacher notes have an optional `class_code` column: `NULL` = global (all students see it), set = scoped to that class only.
+- When teacher is in reading mode for a class, notes default to scoped. A Switch toggle lets them choose "This class only" vs "All classes".
+- Students see: their own notes + global teacher notes + teacher notes scoped to their class (`?teacherNotes=1&forClass=JOINCODE`).
 
 ### Annotation maps (TextReader)
 `buildAnnotationMap(notes, allLineIds)` returns `Map<lineId, {pos, anchor, initials}>` where:

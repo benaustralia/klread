@@ -3,26 +3,31 @@ import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHe
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import type { Line } from './LineRenderer'
 
 type Note = { id: string; body: string; lineIdTo?: string; charStart?: number; charEnd?: number; updatedAt: string }
-type TeacherNote = { id: string; lineId: string; lineIdTo?: string; charStart?: number; charEnd?: number; body: string; initials: string; studentName: string }
+type TeacherNote = { id: string; lineId: string; lineIdTo?: string; charStart?: number; charEnd?: number; body: string; classCode?: string; initials: string; studentName: string }
 
-export function NotesSheet({ line, allLines, open, onOpenChange, studentId, studentName, charStart, charEnd, onSaved }: {
+export function NotesSheet({ line, allLines, open, onOpenChange, studentId, studentName, charStart, charEnd, onSaved, joinCode, isTeacher }: {
   line: Line | null; allLines: Line[]; open: boolean; onOpenChange: (v: boolean) => void
   studentId: string; studentName: string; charStart?: number; charEnd?: number; onSaved?: () => void
+  joinCode?: string; isTeacher?: boolean
 }) {
   const [body, setBody] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
   const [teacherNotes, setTeacherNotes] = useState<TeacherNote[]>([])
   const [saving, setSaving] = useState(false)
+  const [scoped, setScoped] = useState(true)
 
   useEffect(() => {
     if (!open || !line || !studentId) return
     setBody('')
+    setScoped(!!joinCode)
     fetch(`/api/notes?studentId=${studentId}`).then(r => r.json())
       .then((all: Note[]) => setNotes(all.filter((n: any) => n.lineId === line.id))).catch(() => {})
-    fetch('/api/notes?teacherNotes=1').then(r => r.json())
+    const qs = joinCode ? `&forClass=${encodeURIComponent(joinCode)}` : ''
+    fetch(`/api/notes?teacherNotes=1${qs}`).then(r => r.json())
       .then((all: TeacherNote[]) => setTeacherNotes(all.filter(n => {
         if (n.lineId === line.id) return true
         if (!n.lineIdTo) return false
@@ -40,7 +45,8 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ studentId, studentName, lineId: line.id,
         charStart: charStart ?? null, charEnd: charEnd ?? null,
-        act: line.act, scene: line.scene, body: body.trim() }),
+        act: line.act, scene: line.scene, body: body.trim(),
+        classCode: isTeacher && scoped && joinCode ? joinCode : null }),
     }).catch(() => {})
     setBody('')
     const all = await fetch(`/api/notes?studentId=${studentId}`).then(r => r.json()).catch(() => [])
@@ -75,12 +81,20 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
               <Label htmlFor="note-body">Note</Label>
               <Textarea id="note-body" placeholder="Write your note…" value={body}
                 onChange={e => setBody(e.target.value)} rows={5} className="resize-none" />
+              {isTeacher && joinCode && (
+                <label className="flex items-center gap-2 text-sm">
+                  <Switch checked={scoped} onCheckedChange={setScoped} />
+                  {scoped ? `This class only (${joinCode})` : 'All classes'}
+                </label>
+              )}
             </div>
             {teacherNotes.length > 0 && <div className="grid gap-3">
               <Label className="text-xs uppercase tracking-widest">Teacher annotation</Label>
               {teacherNotes.map(n => (
                 <div key={n.id} className="border-2 border-border border-l-4 border-l-foreground rounded-base bg-secondary-background p-3">
-                  <p className="text-xs font-mono text-muted-foreground mb-1">{n.initials} · {n.studentName}</p>
+                  <p className="text-xs font-mono text-muted-foreground mb-1">
+                    {n.initials} · {n.studentName} · {n.classCode ?? 'All classes'}
+                  </p>
                   {n.charStart !== undefined && n.charEnd !== undefined && line && (
                     <mark className="bg-main/25 rounded-sm text-xs font-mono not-italic block mb-2">
                       {allLines.find(l => l.id === n.lineId)?.text.slice(n.charStart, n.charEnd)}
