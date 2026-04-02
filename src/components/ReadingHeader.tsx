@@ -13,10 +13,10 @@ export function ReadingHeader({ left, right, acts, actNum, sceneNum, onGoTo, scr
 }) {
   return (
     <div className="sticky top-0 z-10 bg-background">
-      <header className="border-b px-4 py-3 flex items-center gap-1.5 @[60rem]/app:gap-3">
+      <header className="border-b px-4 py-3 flex items-center gap-1.5 min-[960px]:gap-3">
         <div className="flex-1 min-w-0">{left}</div>
         <div className="shrink-0"><SceneNav acts={acts} actNum={actNum} sceneNum={sceneNum} onGoTo={onGoTo} /></div>
-        <div className="hidden @[60rem]/app:flex items-center gap-2 ml-auto">
+        <div className="hidden min-[960px]:flex items-center gap-2 ml-auto">
           <span className="flex items-center gap-2 text-xs font-semibold shrink-0">
             <span className="apparatus-quarto">‹ › Quarto 1608</span>
             <span className="apparatus-folio">[ ] Folio 1623</span>

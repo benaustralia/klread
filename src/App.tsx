@@ -128,7 +128,7 @@ export default function App() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background @container/app">
+      <div className="min-h-screen bg-background">
         {session && learData ? (
           <ReadingHeader
             left={<h1 className="text-lg font-bold flex items-center gap-2 flex-wrap">
@@ -146,7 +146,7 @@ export default function App() {
             </header>
           </div>
         )}
-        <main className="px-2 py-4 @[60rem]/app:px-6 pb-20 min-[960px]:pb-4">
+        <main className="px-2 py-4 min-[960px]:px-6 pb-20 min-[960px]:pb-4">
           {session && learData
             ? <TextReader acts={learData.acts as any} studentId={session.studentId} studentName={session.studentName}
                 actNum={actNum} sceneNum={sceneNum} onBookmark={saveBookmark}
