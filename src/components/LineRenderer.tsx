@@ -57,9 +57,9 @@ export function LineRenderer({ line, highlights = [], onHighlightClick, onClick 
   onHighlightClick: (anchor: string) => void; onClick: (l: Line) => void
 }) {
   return (
-    <div className="flex gap-3 items-center cursor-pointer hover:bg-secondary-background px-2 rounded-base transition-colors"
+    <div className="flex gap-3 items-start cursor-pointer hover:bg-secondary-background px-2 rounded-base transition-colors"
       onClick={() => onClick(line)}>
-      <span className="text-xs text-muted-foreground select-none w-[7ch] shrink-0 text-right font-mono self-center py-0.5">
+      <span className="text-xs text-muted-foreground select-none w-[7ch] shrink-0 text-right font-mono pt-0.5">
         {line.id}
       </span>
       <span className={`leading-relaxed flex-1 py-0.5 ${line.ana !== 'prose' ? 'pl-6' : ''}`}>
