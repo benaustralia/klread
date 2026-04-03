@@ -113,9 +113,10 @@
   .speaker-label {
     @apply mt-4 mb-1 text-xs uppercase tracking-widest font-bold border-b pb-1;
   }
-  .search-highlight {
-    animation: search-flash 2.5s ease-out;
-  }
+}
+
+.search-highlight {
+  animation: search-flash 2.5s ease-out;
 }
 
 @keyframes search-flash {

@@ -16,11 +16,11 @@ export function ReadingHeader({ subtitle, toolbar, acts, actNum, sceneNum, onGoT
     <>
       <div className="sticky top-0 z-10 bg-background">
         <header className="border-b px-4 py-3 flex items-center gap-1.5 min-[960px]:gap-3 flex-nowrap">
-          <h1 className="text-lg font-bold flex items-center gap-2 min-w-0 shrink whitespace-nowrap">
+          <h1 className="text-lg font-bold flex items-center gap-2 shrink-0 whitespace-nowrap">
             <BrokenCrown className="w-8 h-8 shrink-0" />
-            <span className="truncate">
-              King Lear<span className="hidden min-[960px]:inline text-main"> Promptbook</span>{subtitle && <span className="hidden min-[960px]:inline text-sm font-semibold text-muted-foreground"> — {subtitle}</span>}
-            </span>
+            King Lear
+            <span className="hidden min-[960px]:inline text-main">Promptbook</span>
+            {subtitle && <span className="hidden min-[960px]:inline text-sm font-semibold text-muted-foreground">— {subtitle}</span>}
           </h1>
           <div className="shrink-0">
             <SceneNav acts={acts} actNum={actNum} sceneNum={sceneNum} onGoTo={onGoTo} />
