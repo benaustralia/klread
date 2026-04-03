@@ -19,10 +19,11 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
   const [teacherNotes, setTeacherNotes] = useState<TeacherNote[]>([])
   const [saving, setSaving] = useState(false)
   const [scoped, setScoped] = useState(true)
+  const [editing, setEditing] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (!open || !line || !studentId) return
-    setBody('')
+    setBody(''); setEditing({})
     setScoped(!!joinCode)
     fetch(`/api/notes?studentId=${studentId}`).then(r => r.json())
       .then((all: Note[]) => setNotes(all.filter((n: any) => n.lineId === line.id))).catch(() => {})
@@ -52,6 +53,18 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
     const all = await fetch(`/api/notes?studentId=${studentId}`).then(r => r.json()).catch(() => [])
     setNotes(all.filter((n: any) => n.lineId === line.id))
     onSaved?.(); setSaving(false)
+  }
+
+  async function editNote(id: string) {
+    const text = editing[id]?.trim()
+    if (!text) return
+    await fetch('/api/notes', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, body: text }),
+    }).catch(() => {})
+    setNotes(p => p.map(n => n.id === id ? { ...n, body: text } : n))
+    setEditing(p => { const c = { ...p }; delete c[id]; return c })
+    onSaved?.()
   }
 
   function del(id: string) {
@@ -105,15 +118,33 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
             {notes.length > 0 && <div className="grid gap-3">
               <Label className="text-xs uppercase tracking-widest">Your notes</Label>
               {notes.map(n => (
-                <div key={n.id} className="border-2 border-border rounded-base bg-background p-3 relative">
+                <div key={n.id} className="border-2 border-border rounded-base bg-background p-3">
                   {n.charStart !== undefined && n.charEnd !== undefined && line && (
                     <mark className="bg-stabilo-orange rounded-sm text-xs font-mono not-italic block mb-2">
                       {line.text.slice(n.charStart, n.charEnd)}
                     </mark>)}
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap pr-5">{n.body}</p>
-                  <p className="text-xs text-muted-foreground mt-2">{new Date(n.updatedAt).toLocaleString()}</p>
-                  <button onClick={() => del(n.id)}
-                    className="absolute top-2 right-2 text-muted-foreground hover:text-destructive text-xs">✕</button>
+                  {n.id in editing ? (
+                    <div className="grid gap-2">
+                      <Textarea value={editing[n.id]} onChange={e => setEditing(p => ({ ...p, [n.id]: e.target.value }))}
+                        rows={3} className="resize-none" autoFocus />
+                      <span className="flex gap-2 text-xs">
+                        <button onClick={() => editNote(n.id)} className="text-primary hover:underline">Save</button>
+                        <button onClick={() => setEditing(p => { const c = { ...p }; delete c[n.id]; return c })}
+                          className="text-muted-foreground">Cancel</button>
+                      </span>
+                    </div>
+                  ) : (<>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{n.body}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-muted-foreground">{new Date(n.updatedAt).toLocaleString()}</p>
+                      <span className="flex gap-3 text-xs">
+                        <button onClick={() => setEditing(p => ({ ...p, [n.id]: n.body }))}
+                          className="text-muted-foreground hover:text-foreground">Edit</button>
+                        <button onClick={() => del(n.id)}
+                          className="text-muted-foreground hover:text-destructive">Delete</button>
+                      </span>
+                    </div>
+                  </>)}
                 </div>))}
             </div>}
           </div>
