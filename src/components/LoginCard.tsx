@@ -35,9 +35,10 @@ export function LoginCard({ name, setName, code, setCode, initials, setInitials,
                 id="login-initials"
                 placeholder="e.g. BH"
                 value={initials}
-                onChange={e => setInitials(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4).split('').join('.'))}
+                onChange={e => setInitials(e.target.value.toUpperCase())}
                 onKeyDown={enter}
                 maxLength={7}
+                onBlur={e => { const v = e.target.value.replace(/[^A-Z]/g, '').slice(0, 4).split('').join('.'); setInitials(v) }}
                 autoFocus
               />
             </div>
