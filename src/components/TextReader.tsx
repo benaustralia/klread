@@ -55,10 +55,10 @@ function getSelection(): { lineId: string; charStart: number; charEnd: number } 
   return start === -1 ? null : { lineId: el.getAttribute('data-line-id')!, charStart: start, charEnd: start + trimmed.length }
 }
 
-export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onBookmark, scrollToLineId, onGoTo, textSize = 'base', joinCode, isTeacher }: {
+export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onBookmark, scrollToLineId, highlightLineId, onGoTo, textSize = 'base', joinCode, isTeacher }: {
   acts: ActData[]; studentId: string; studentName: string
   actNum: number; sceneNum: number; onBookmark?: (lineId: string) => void
-  scrollToLineId?: string; onGoTo?: (a: number, s: number) => void; textSize?: 'base' | 'lg' | 'xl'
+  scrollToLineId?: string; highlightLineId?: string; onGoTo?: (a: number, s: number) => void; textSize?: 'base' | 'lg' | 'xl'
   joinCode?: string; isTeacher?: boolean
 }) {
   const [selected, setSelected] = useState<Line | null>(null)
@@ -92,11 +92,23 @@ export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onB
     if (wrapper) {
       wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' })
       scrolledRef.current = true
+    }
+  })
+
+  const hlRef = useRef<string>()
+  useEffect(() => {
+    if (!highlightLineId || highlightLineId === hlRef.current) return
+    hlRef.current = highlightLineId
+    const tryHighlight = () => {
+      const wrapper = document.querySelector(`[data-line-id="${highlightLineId}"]`)
+      if (!wrapper) return false
       const target = wrapper.querySelector('[data-line-text]')?.closest('div') ?? wrapper
       target.classList.add('search-highlight')
       setTimeout(() => target.classList.remove('search-highlight'), 2500)
+      return true
     }
-  })
+    if (!tryHighlight()) setTimeout(tryHighlight, 200)
+  }, [highlightLineId])
 
   useEffect(() => {
     if (!onBookmark) return

@@ -31,6 +31,7 @@ export default function App() {
   const [sceneNum, setSceneNum] = useState(1)
   const scrollProgress = useSyncExternalStore(subScroll, getScroll)
   const [scrollToLineId, setScrollToLineId] = useState<string | undefined>()
+  const [highlightLineId, setHighlightLineId] = useState<string | undefined>()
   const [searchOpen, setSearchOpen] = useState(false)
   const [notesOpen, setNotesOpen] = useState(false)
   const [textSize, setTextSize] = useState<'base' | 'lg' | 'xl'>('base')
@@ -147,7 +148,7 @@ export default function App() {
           {session && learData
             ? <TextReader acts={learData.acts as any} studentId={session.studentId} studentName={session.studentName}
                 actNum={actNum} sceneNum={sceneNum} onBookmark={saveBookmark}
-                scrollToLineId={scrollToLineId} onGoTo={goTo} textSize={textSize} joinCode={session.joinCode} />
+                scrollToLineId={scrollToLineId} highlightLineId={highlightLineId} onGoTo={goTo} textSize={textSize} joinCode={session.joinCode} />
             : session
               ? <p className="text-center text-muted-foreground py-8">Loading play text…</p>
               : <LoginCard name={name} setName={setName} code={code} setCode={setCode}
@@ -158,7 +159,7 @@ export default function App() {
       {session && <AllNotesSheet studentId={session.studentId} joinCode={session.joinCode}
         open={notesOpen} onOpenChange={setNotesOpen} />}
       {learData && <SearchDialog acts={learData.acts as any} open={searchOpen} onOpenChange={setSearchOpen}
-        onNavigate={(a, s, lineId) => { goTo(a, s); setSearchOpen(false); setTimeout(() => setScrollToLineId(lineId), 150) }} />}
+        onNavigate={(a, s, lineId) => { goTo(a, s); setSearchOpen(false); setTimeout(() => { setScrollToLineId(lineId); setHighlightLineId(lineId) }, 150) }} />}
     </TooltipProvider>
   )
 }
