@@ -25,12 +25,12 @@ export function ReadingHeader({ subtitle, toolbar, acts, actNum, sceneNum, onGoT
           <div className="shrink-0">
             <SceneNav acts={acts} actNum={actNum} sceneNum={sceneNum} onGoTo={onGoTo} />
           </div>
-          <div className="hidden min-[960px]:flex items-center gap-2 ml-auto shrink-0">
-            <span className="flex items-center gap-2 text-xs font-semibold shrink-0">
-              <span className="apparatus-quarto">‹ › Quarto 1608</span>
-              <span className="apparatus-folio">[ ] Folio 1623</span>
-            </span>
-            <span className="flex items-center gap-1">{toolbar}</span>
+          <span className="flex items-center gap-2 text-xs font-semibold shrink-0 ml-auto">
+            <span className="apparatus-quarto">‹ › Quarto 1608</span>
+            <span className="apparatus-folio">[ ] Folio 1623</span>
+          </span>
+          <div className="hidden min-[960px]:flex items-center gap-1 shrink-0">
+            {toolbar}
           </div>
         </header>
         <Progress value={scrollProgress} className="w-full rounded-none border-0 h-1" />
