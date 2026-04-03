@@ -95,7 +95,7 @@ export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onB
     }
   })
 
-  const hlRef = useRef<string>()
+  const hlRef = useRef<string>(null)
   useEffect(() => {
     if (!highlightLineId || highlightLineId === hlRef.current) return
     hlRef.current = highlightLineId
