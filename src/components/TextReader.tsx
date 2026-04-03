@@ -143,7 +143,7 @@ export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onB
 
   return (
     <>
-      <div className={`max-w-3xl mx-auto py-4 ${{ base: '', lg: 'text-lg', xl: 'text-xl' }[textSize]}`} onPointerUp={handlePointerUp}>
+      <div className="max-w-3xl mx-auto py-4" style={{ zoom: { base: 1, lg: 1.15, xl: 1.3 }[textSize] }} onPointerUp={handlePointerUp}>
         {scene?.location && (
           <div className="mb-6 border-b pb-4">
             <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1">
