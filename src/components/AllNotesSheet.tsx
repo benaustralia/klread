@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -85,7 +85,6 @@ export function AllNotesSheet({ studentId, joinCode, open, onOpenChange, isTeach
               href: URL.createObjectURL(new Blob([text], { type: 'text/plain' })), download: 'king-lear-notes.txt',
             }).click()
           }}>Export</Button>
-          <SheetClose asChild><Button variant="neutral" className="flex-1">Close</Button></SheetClose>
         </div>
       </SheetContent>
     </Sheet>

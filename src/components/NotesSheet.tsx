@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -149,10 +149,9 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
             </div>}
           </div>
         </div>
-        <SheetFooter className="flex flex-col gap-2 px-4 pb-4">
+        <SheetFooter className="px-4 pb-4">
           <Button onClick={save} disabled={saving || !body.trim()} className="w-full">
             {saving ? 'Saving…' : 'Save note'}</Button>
-          <SheetClose asChild><Button variant="neutral" className="w-full">Close</Button></SheetClose>
         </SheetFooter>
       </SheetContent>
     </Sheet>
