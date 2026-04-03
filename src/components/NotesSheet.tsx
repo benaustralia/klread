@@ -149,8 +149,8 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
             </div>}
           </div>
         </div>
-        <SheetFooter className="px-4 pb-4">
-          <Button onClick={save} disabled={saving || !body.trim()} className="w-full">
+        <SheetFooter className="px-4 pb-4 flex justify-end">
+          <Button onClick={save} disabled={saving || !body.trim()}
             {saving ? 'Saving…' : 'Save note'}</Button>
         </SheetFooter>
       </SheetContent>

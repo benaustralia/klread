@@ -75,7 +75,7 @@ export function AllNotesSheet({ studentId, joinCode, open, onOpenChange, isTeach
             )
           })}
         </div>
-        <div className="px-4 pb-4 flex gap-2">
+        <div className="px-4 pb-4 flex justify-end">
           <Button variant="neutral" size="sm" disabled={!notes.length} onClick={() => {
             const text = notes.map(n => {
               const range = n.lineIdTo && n.lineIdTo !== n.lineId ? `${n.lineId}–${n.lineIdTo}` : n.lineId
