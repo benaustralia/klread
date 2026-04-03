@@ -88,12 +88,13 @@ export function TextReader({ acts, studentId, studentName, actNum, sceneNum, onB
   useEffect(() => { if (scrollToLineId) scrolledRef.current = false }, [scrollToLineId])
   useEffect(() => {
     if (!scrollToLineId || scrolledRef.current) return
-    const el = document.querySelector(`[data-line-id="${scrollToLineId}"]`)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    const wrapper = document.querySelector(`[data-line-id="${scrollToLineId}"]`)
+    if (wrapper) {
+      wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' })
       scrolledRef.current = true
-      el.classList.add('search-highlight')
-      setTimeout(() => el.classList.remove('search-highlight'), 2500)
+      const target = wrapper.querySelector('[data-line-text]')?.closest('div') ?? wrapper
+      target.classList.add('search-highlight')
+      setTimeout(() => target.classList.remove('search-highlight'), 2500)
     }
   })
 
