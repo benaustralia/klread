@@ -26,7 +26,7 @@ export function ReadingHeader({ subtitle, toolbar, acts, actNum, sceneNum, onGoT
             <SceneNav acts={acts} actNum={actNum} sceneNum={sceneNum} onGoTo={onGoTo} />
           </div>
           <div className="hidden min-[960px]:flex items-center gap-2 ml-auto shrink-0">
-            <span className="hidden min-[1200px]:flex items-center gap-2 text-xs font-semibold shrink-0">
+            <span className="flex items-center gap-2 text-xs font-semibold shrink-0">
               <span className="apparatus-quarto">‹ › Quarto 1608</span>
               <span className="apparatus-folio">[ ] Folio 1623</span>
             </span>
