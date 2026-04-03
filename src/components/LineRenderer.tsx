@@ -10,8 +10,8 @@ export type Line = {
 export type Highlight = { charStart?: number; charEnd?: number; anchor: string }
 
 const VT = { a: 'Quarto 1608 only — not in the Folio', b: 'Folio 1623 only — not in the First Quarto' } as const
-const VC = { a: 'text-sky-600', b: 'text-yellow-700' } as const
-const VBG = { a: 'bg-sky-200', b: 'bg-yellow-200' } as const
+const VC = { a: 'text-stabilo-blue-strong', b: 'text-stabilo-yellow-strong' } as const
+const VBG = { a: 'bg-stabilo-blue', b: 'bg-stabilo-yellow' } as const
 
 function BracketTip({ children, label }: { children: React.ReactNode; label: string }) {
   return (
@@ -40,7 +40,7 @@ function renderText(text: string, hl: Highlight[], variants: Variant[], onHl: (a
     const seg = text.slice(s, e)
     const vr = variants.find(x => x.charStart <= s && x.charEnd >= e)
     const h = hl.find(x => (x.charStart ?? 0) <= s && (x.charEnd ?? text.length) >= e)
-    const cls = [vr && VBG[vr.type], h && 'bg-main/25 rounded-sm cursor-pointer hover:bg-main/40 not-italic'].filter(Boolean).join(' ')
+    const cls = [vr && VBG[vr.type], h && 'bg-stabilo-orange rounded-sm cursor-pointer hover:bg-stabilo-orange-strong not-italic'].filter(Boolean).join(' ')
     if (h) parts.push(<mark key={`s${i}`} className={cls} onClick={ev => { ev.stopPropagation(); onHl(h.anchor) }}>{seg}</mark>)
     else if (cls) parts.push(<span key={`s${i}`} className={cls}>{seg}</span>)
     else parts.push(seg)

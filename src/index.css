@@ -67,6 +67,14 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
 
+  /* Stabilo Boss highlighter colours */
+  --color-stabilo-orange: #fed8b1;
+  --color-stabilo-orange-strong: #fdbe85;
+  --color-stabilo-blue: #a8d8f0;
+  --color-stabilo-blue-strong: #5bb8e8;
+  --color-stabilo-yellow: #fff3a3;
+  --color-stabilo-yellow-strong: #ffe45c;
+
   /* Neobrutalism mappings */
   --color-main: var(--main);
   --color-main-foreground: var(--main-foreground);
@@ -105,10 +113,10 @@
 
 @layer components {
   .apparatus-quarto {
-    @apply bg-sky-200 border-l-2 border-sky-400 px-2 py-1 text-black text-sm font-semibold rounded-sm;
+    @apply bg-stabilo-blue border-l-2 border-stabilo-blue-strong px-2 py-1 text-black text-sm font-semibold rounded-sm;
   }
   .apparatus-folio {
-    @apply bg-yellow-200 border-l-2 border-yellow-400 px-2 py-1 text-black text-sm font-semibold rounded-sm;
+    @apply bg-stabilo-yellow border-l-2 border-stabilo-yellow-strong px-2 py-1 text-black text-sm font-semibold rounded-sm;
   }
   .speaker-label {
     @apply mt-4 mb-1 text-xs uppercase tracking-widest font-bold border-b pb-1;

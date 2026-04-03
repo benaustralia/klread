@@ -70,7 +70,7 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
           <SheetDescription asChild>
             <div>
               {line?.speaker && <span className="block font-bold uppercase tracking-widest text-xs mb-1">{line.speaker}</span>}
-              {selText ? <mark className="bg-main/25 rounded-sm not-italic font-medium">{selText}</mark>
+              {selText ? <mark className="bg-stabilo-orange rounded-sm not-italic font-medium">{selText}</mark>
                 : <p className="text-sm">{line?.text}</p>}
             </div>
           </SheetDescription>
@@ -96,7 +96,7 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
                     {n.initials} · {n.studentName} · {n.classCode ?? 'All classes'}
                   </p>
                   {n.charStart !== undefined && n.charEnd !== undefined && line && (
-                    <mark className="bg-main/25 rounded-sm text-xs font-mono not-italic block mb-2">
+                    <mark className="bg-stabilo-orange rounded-sm text-xs font-mono not-italic block mb-2">
                       {allLines.find(l => l.id === n.lineId)?.text.slice(n.charStart, n.charEnd)}
                     </mark>)}
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{n.body}</p>
@@ -107,7 +107,7 @@ export function NotesSheet({ line, allLines, open, onOpenChange, studentId, stud
               {notes.map(n => (
                 <div key={n.id} className="border-2 border-border rounded-base bg-background p-3 relative">
                   {n.charStart !== undefined && n.charEnd !== undefined && line && (
-                    <mark className="bg-main/25 rounded-sm text-xs font-mono not-italic block mb-2">
+                    <mark className="bg-stabilo-orange rounded-sm text-xs font-mono not-italic block mb-2">
                       {line.text.slice(n.charStart, n.charEnd)}
                     </mark>)}
                   <p className="text-sm leading-relaxed whitespace-pre-wrap pr-5">{n.body}</p>
