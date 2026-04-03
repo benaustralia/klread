@@ -3,12 +3,14 @@ import { BrokenCrown } from './BrokenCrown'
 import { SceneNav } from './SceneNav'
 import { Progress } from '@/components/ui/progress'
 
-const legend = (
-  <span className="flex items-center gap-2 text-xs font-semibold shrink-0">
-    <span className="apparatus-quarto">‹ › Quarto 1608</span>
-    <span className="apparatus-folio">[ ] Folio 1623</span>
-  </span>
-)
+function Legend({ short }: { short?: boolean }) {
+  return (
+    <span className="flex items-center gap-2 text-xs font-semibold shrink-0">
+      <span className="apparatus-quarto">‹ › {short ? 'Q' : 'Quarto 1608'}</span>
+      <span className="apparatus-folio">[ ] {short ? 'F' : 'Folio 1623'}</span>
+    </span>
+  )
+}
 
 export function ReadingHeader({ subtitle, toolbar, acts, actNum, sceneNum, onGoTo, scrollProgress }: {
   subtitle?: string
@@ -33,14 +35,14 @@ export function ReadingHeader({ subtitle, toolbar, acts, actNum, sceneNum, onGoT
             <SceneNav acts={acts} actNum={actNum} sceneNum={sceneNum} onGoTo={onGoTo} />
           </div>
           <div className="hidden min-[960px]:flex items-center gap-2 ml-auto shrink-0">
-            {legend}
+            <Legend />
             <span className="flex items-center gap-1">{toolbar}</span>
           </div>
         </header>
         <Progress value={scrollProgress} className="w-full rounded-none border-0 h-1" />
       </div>
       <div className="min-[960px]:hidden fixed bottom-0 inset-x-0 z-10 bg-background border-t flex items-center justify-around px-4 py-2">
-        {legend}
+        <Legend short />
         {toolbar}
       </div>
     </>
