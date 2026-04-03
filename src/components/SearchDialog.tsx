@@ -41,7 +41,7 @@ export function SearchDialog({ acts, open, onOpenChange, onNavigate }: {
           <DialogTitle>Search the text</DialogTitle>
         </DialogHeader>
         <Input
-          placeholder="Enter a phrase or speaker name…"
+          placeholder="Search…"
           value={query}
           onChange={e => setQuery(e.target.value)}
           autoFocus
