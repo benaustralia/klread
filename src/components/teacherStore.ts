@@ -26,17 +26,25 @@ export const useTeacher = create<{
   copied: {}, creating: false, adding: {}, notesOpen: false, actNum: 1, sceneNum: 1,
   set: (p) => set(p),
   init: (k) => {
+    set({ err: '' })
+    if (!k) { set({ err: 'Missing teacher key' }); return }
     fetch(`/api/teacher?key=${k}&summary=1`)
-      .then(r => { if (r.status === 403) throw new Error('Invalid teacher key'); return r.json() })
-      .then(students => set({ students })).catch(e => set({ err: e.message }))
-    fetch(`/api/teacher?key=${k}`).then(r => r.json()).then(notes => set({ notes })).catch(() => {})
-    fetch(`/api/classes?key=${k}`).then(r => r.json()).then((all: Class[]) => {
-      const classes = all.filter((c: Class) => c.label !== 'Teacher')
-      set({ classes })
-      const rp = new URLSearchParams(location.search).get('reading')
-      const m = rp && classes.find((c: Class) => c.joinCode === rp)
-      if (m) set({ reading: { joinCode: m.joinCode, label: m.label } })
-    }).catch(() => {})
+      .then(r => { if (!r.ok) throw new Error(r.status === 403 ? 'Invalid teacher key' : `Request failed (${r.status})`); return r.json() })
+      .then(students => set({ students: Array.isArray(students) ? students : [] }))
+      .catch(e => set({ err: e.message }))
+    fetch(`/api/teacher?key=${k}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(notes => set({ notes: Array.isArray(notes) ? notes : [] }))
+      .catch(() => set({ notes: [] }))
+    fetch(`/api/classes?key=${k}`)
+      .then(r => r.ok ? r.json() : [])
+      .then((all: Class[]) => {
+        const classes = Array.isArray(all) ? all.filter((c: Class) => c.label !== 'Teacher') : []
+        set({ classes })
+        const rp = new URLSearchParams(location.search).get('reading')
+        const m = rp && classes.find((c: Class) => c.joinCode === rp)
+        if (m) set({ reading: { joinCode: m.joinCode, label: m.label } })
+      }).catch(() => set({ classes: [] }))
   },
   setReading: (val) => {
     set({ reading: val })
@@ -60,8 +68,9 @@ export const useTeacher = create<{
     if (!name || !ini) return
     set((s: any) => ({ adding: { ...s.adding, [jc]: true } }))
     await post('/api/sessions', { studentName: name, joinCode: jc, initials: ini })
-    const students = await fetch(`/api/teacher?key=${k}&summary=1`).then(r => r.json()).catch(() => [])
-    set((s: any) => ({ students, adding: { ...s.adding, [jc]: false } }))
+    const students = await fetch(`/api/teacher?key=${k}&summary=1`)
+      .then(r => r.ok ? r.json() : []).catch(() => [])
+    set((s: any) => ({ students: Array.isArray(students) ? students : [], adding: { ...s.adding, [jc]: false } }))
   },
   delStudent: (k, id) => fetch(`/api/sessions?studentId=${id}&key=${k}`, { method: 'DELETE' })
     .then(() => set((s: any) => ({ students: s.students.filter((x: any) => x.studentId !== id) }))),

@@ -115,12 +115,17 @@ export default function App() {
     finally { setLoading(false) }
   }
 
-  if (location.pathname === '/teacher' || session?.isTeacher) return (
-    <Suspense fallback={null}>
-      <TeacherView teacherKey={session?.joinCode ?? new URLSearchParams(location.search).get('key') ?? ''}
-        teacherStudentId={session?.studentId} teacherName={session?.studentName} />
-    </Suspense>
-  )
+  if (location.pathname === '/teacher' || session?.isTeacher) {
+    const urlKey = new URLSearchParams(location.search).get('key') ?? ''
+    const teacherKey = session?.isTeacher ? session.joinCode : urlKey
+    return (
+      <Suspense fallback={null}>
+        <TeacherView teacherKey={teacherKey}
+          teacherStudentId={session?.isTeacher ? session.studentId : undefined}
+          teacherName={session?.isTeacher ? session.studentName : undefined} />
+      </Suspense>
+    )
+  }
 
   const goTo = (a: number, s: number) => { setActNum(a); setSceneNum(s) }
   const sizes = ['base', 'lg', 'xl'] as const
