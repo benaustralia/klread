@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useSyncExternalStore } from 'react'
+import { StickyNote, Search, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { BrokenCrown } from './components/BrokenCrown'
@@ -123,9 +124,18 @@ export default function App() {
   const toolbar = <>
     <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'base'} onClick={cycleSize(-1)}>A−</Button>
     <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'xl'} onClick={cycleSize(1)}>A+</Button>
-    <Button onClick={() => setNotesOpen(true)} variant="neutral" size="sm" className="text-xs">Notes</Button>
-    <Button onClick={() => setSearchOpen(true)} variant="neutral" size="sm" className="text-xs">Search</Button>
-    <Button onClick={() => { localStorage.removeItem(KEY); setSession(null) }} variant="neutral" size="sm" className="text-xs">Log out</Button>
+    <Button onClick={() => setNotesOpen(true)} variant="neutral" size="sm" className="text-xs" aria-label="Notes">
+      <StickyNote className="size-4 min-[960px]:hidden" />
+      <span className="hidden min-[960px]:inline">Notes</span>
+    </Button>
+    <Button onClick={() => setSearchOpen(true)} variant="neutral" size="sm" className="text-xs" aria-label="Search">
+      <Search className="size-4 min-[960px]:hidden" />
+      <span className="hidden min-[960px]:inline">Search</span>
+    </Button>
+    <Button onClick={() => { localStorage.removeItem(KEY); setSession(null) }} variant="neutral" size="sm" className="text-xs" aria-label="Log out">
+      <LogOut className="size-4 min-[960px]:hidden" />
+      <span className="hidden min-[960px]:inline">Log out</span>
+    </Button>
   </>
 
   return (

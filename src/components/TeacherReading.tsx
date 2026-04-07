@@ -1,4 +1,5 @@
 import { use, useState, useSyncExternalStore } from 'react'
+import { ArrowLeft, StickyNote, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { TextReader } from './TextReader'
@@ -21,11 +22,20 @@ export function TeacherReading({ teacherStudentId, teacherName }: {
 
   const cycleSize = (dir: -1 | 1) => () => setTextSize(sz => sizes[sizes.indexOf(sz) + dir])
   const toolbar = <>
-    <Button variant="neutral" size="sm" className="text-xs" onClick={() => s.setReading(null)}>← Back</Button>
+    <Button variant="neutral" size="sm" className="text-xs" onClick={() => s.setReading(null)} aria-label="Back">
+      <ArrowLeft className="size-4 min-[960px]:hidden" />
+      <span className="hidden min-[960px]:inline">← Back</span>
+    </Button>
     <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'base'} onClick={cycleSize(-1)}>A−</Button>
     <Button variant="neutral" size="sm" className="text-xs px-2" disabled={textSize === 'xl'} onClick={cycleSize(1)}>A+</Button>
-    <Button onClick={() => s.set({ notesOpen: true })} variant="neutral" size="sm" className="text-xs">Notes</Button>
-    <Button onClick={() => setSearchOpen(true)} variant="neutral" size="sm" className="text-xs">Search</Button>
+    <Button onClick={() => s.set({ notesOpen: true })} variant="neutral" size="sm" className="text-xs" aria-label="Notes">
+      <StickyNote className="size-4 min-[960px]:hidden" />
+      <span className="hidden min-[960px]:inline">Notes</span>
+    </Button>
+    <Button onClick={() => setSearchOpen(true)} variant="neutral" size="sm" className="text-xs" aria-label="Search">
+      <Search className="size-4 min-[960px]:hidden" />
+      <span className="hidden min-[960px]:inline">Search</span>
+    </Button>
   </>
 
   return (
