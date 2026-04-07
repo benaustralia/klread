@@ -1,16 +1,15 @@
-import { useState, useEffect, useRef, useSyncExternalStore } from 'react'
+import { useState, useEffect, useRef, useSyncExternalStore, lazy, Suspense } from 'react'
 import { StickyNote, Search, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { TooltipProvider } from '@/components/ui/tooltip'
 import { BrokenCrown } from './components/BrokenCrown'
-import { TextReader } from './components/TextReader'
-
-import { SearchDialog } from './components/SearchDialog'
 import { LoginCard } from './components/LoginCard'
-import { TeacherView } from './components/TeacherView'
-import { ReadingHeader } from './components/ReadingHeader'
-import { AllNotesSheet } from './components/AllNotesSheet'
-import { learPromise } from './data/lear'
+
+const TooltipProvider = lazy(() => import('@/components/ui/tooltip').then(m => ({ default: m.TooltipProvider })))
+const TextReader = lazy(() => import('./components/TextReader').then(m => ({ default: m.TextReader })))
+const SearchDialog = lazy(() => import('./components/SearchDialog').then(m => ({ default: m.SearchDialog })))
+const TeacherView = lazy(() => import('./components/TeacherView').then(m => ({ default: m.TeacherView })))
+const ReadingHeader = lazy(() => import('./components/ReadingHeader').then(m => ({ default: m.ReadingHeader })))
+const AllNotesSheet = lazy(() => import('./components/AllNotesSheet').then(m => ({ default: m.AllNotesSheet })))
 
 type Session = {
   studentId: string; studentName: string; joinCode: string
@@ -44,7 +43,10 @@ export default function App() {
   const [err, setErr] = useState('')
   const bmTimer = useRef<ReturnType<typeof setTimeout>>(null)
 
-  useEffect(() => { learPromise.then(setLearData) }, [])
+  useEffect(() => {
+    if (!session) return
+    import('./data/lear').then(m => m.learPromise).then(setLearData)
+  }, [session])
 
   function applyBookmark(id: string) {
     const [a, s] = id.split('.').map(Number)
@@ -114,8 +116,10 @@ export default function App() {
   }
 
   if (location.pathname === '/teacher' || session?.isTeacher) return (
-    <TeacherView teacherKey={session?.joinCode ?? new URLSearchParams(location.search).get('key') ?? ''}
-      teacherStudentId={session?.studentId} teacherName={session?.studentName} />
+    <Suspense fallback={null}>
+      <TeacherView teacherKey={session?.joinCode ?? new URLSearchParams(location.search).get('key') ?? ''}
+        teacherStudentId={session?.studentId} teacherName={session?.studentName} />
+    </Suspense>
   )
 
   const goTo = (a: number, s: number) => { setActNum(a); setSceneNum(s) }
@@ -138,38 +142,50 @@ export default function App() {
     </Button>
   </>
 
-  return (
-    <TooltipProvider>
-      <div className="min-h-screen bg-background">
-        {session && learData ? (
+  const shell = (
+    <div className="min-h-screen bg-background">
+      {session && learData ? (
+        <Suspense fallback={null}>
           <ReadingHeader toolbar={toolbar}
             acts={learData.acts as any} actNum={actNum} sceneNum={sceneNum}
             onGoTo={goTo} scrollProgress={scrollProgress} />
-        ) : (
-          <div className="sticky top-0 z-10 bg-background">
-            <header className="border-b px-4 py-3">
-              <h1 className="text-lg font-bold flex items-center gap-2">
-                <BrokenCrown className="w-8 h-8" /> King Lear <span className="text-main">Promptbook</span>
-              </h1>
-            </header>
-          </div>
-        )}
-        <main className="px-2 py-4 min-[960px]:px-6 pb-20 min-[960px]:pb-4">
-          {session && learData
-            ? <TextReader acts={learData.acts as any} studentId={session.studentId} studentName={session.studentName}
+        </Suspense>
+      ) : (
+        <div className="sticky top-0 z-10 bg-background">
+          <header className="border-b px-4 py-3">
+            <h1 className="text-lg font-bold flex items-center gap-2">
+              <BrokenCrown className="w-8 h-8" /> King Lear <span className="text-main">Promptbook</span>
+            </h1>
+          </header>
+        </div>
+      )}
+      <main className="px-2 py-4 min-[960px]:px-6 pb-20 min-[960px]:pb-4">
+        {session && learData
+          ? <Suspense fallback={null}>
+              <TextReader acts={learData.acts as any} studentId={session.studentId} studentName={session.studentName}
                 actNum={actNum} sceneNum={sceneNum} onBookmark={saveBookmark}
                 scrollToLineId={scrollToLineId} highlightLineId={highlightLineId} onGoTo={goTo} textSize={textSize} joinCode={session.joinCode} />
-            : session
-              ? <p className="text-center text-muted-foreground py-8">Loading play text…</p>
-              : <LoginCard name={name} setName={setName} code={code} setCode={setCode}
-                  initials={initials} setInitials={setInitials}
-                  isNew={isNew} loading={loading} err={err} onJoin={join} />}
-        </main>
-      </div>
-      {session && <AllNotesSheet studentId={session.studentId} joinCode={session.joinCode}
-        open={notesOpen} onOpenChange={setNotesOpen} />}
-      {learData && <SearchDialog acts={learData.acts as any} open={searchOpen} onOpenChange={setSearchOpen}
-        onNavigate={(a, s, lineId) => { goTo(a, s); setSearchOpen(false); setTimeout(() => { setScrollToLineId(lineId); setHighlightLineId(lineId) }, 150) }} />}
-    </TooltipProvider>
+            </Suspense>
+          : session
+            ? <p className="text-center text-muted-foreground py-8">Loading play text…</p>
+            : <LoginCard name={name} setName={setName} code={code} setCode={setCode}
+                initials={initials} setInitials={setInitials}
+                isNew={isNew} loading={loading} err={err} onJoin={join} />}
+      </main>
+    </div>
+  )
+
+  if (!session) return shell
+
+  return (
+    <Suspense fallback={shell}>
+      <TooltipProvider>
+        {shell}
+        <AllNotesSheet studentId={session.studentId} joinCode={session.joinCode}
+          open={notesOpen} onOpenChange={setNotesOpen} />
+        {learData && <SearchDialog acts={learData.acts as any} open={searchOpen} onOpenChange={setSearchOpen}
+          onNavigate={(a, s, lineId) => { goTo(a, s); setSearchOpen(false); setTimeout(() => { setScrollToLineId(lineId); setHighlightLineId(lineId) }, 150) }} />}
+      </TooltipProvider>
+    </Suspense>
   )
 }

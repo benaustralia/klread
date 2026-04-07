@@ -42,9 +42,9 @@ export function ReadingHeader({ subtitle, toolbar, acts, actNum, sceneNum, onGoT
         </header>
         <Progress value={scrollProgress} className="w-full rounded-none border-0 h-1" />
       </div>
-      <div className="min-[960px]:hidden fixed bottom-0 inset-x-0 z-10 bg-background border-t flex items-center justify-around px-4 py-2">
+      <div className="min-[960px]:hidden fixed bottom-0 inset-x-0 z-10 bg-background border-t flex items-center justify-around px-4 py-3">
         <Legend short />
-        {toolbar}
+        <span className="flex items-center gap-1">{toolbar}</span>
       </div>
     </>
   )
