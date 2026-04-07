@@ -24,18 +24,20 @@ const stuCols = (onDel: (id: string) => void): ColumnDef<Student>[] => [
   )},
 ]
 
-export function TeacherView({ teacherKey, teacherStudentId, teacherName }: {
+export function TeacherView({ teacherKey, teacherStudentId, teacherName, onBail }: {
   teacherKey?: string; teacherStudentId?: string; teacherName?: string
+  onBail?: (msg: string) => void
 }) {
   const k = encodeURIComponent(teacherKey ?? new URLSearchParams(location.search).get('key') ?? '')
   const s = useTeacher()
   useEffect(() => { s.init(k) }, [])
+  useEffect(() => {
+    if (!s.err) return
+    onBail?.(s.err)
+    s.set({ err: '' })
+  }, [s.err])
 
-  if (s.err) return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-      <p className="text-destructive font-semibold">{s.err}</p>
-      <button onClick={logout} className="text-sm underline text-muted-foreground">Log out and try again</button>
-    </div>)
+  if (s.err) return null
   if (s.reading) return <TeacherReading teacherStudentId={teacherStudentId} teacherName={teacherName} />
 
   const np = { editing: s.editNotes, setEditing: s.setEditNotes, onSave: s.saveNote, onDel: s.delNote }

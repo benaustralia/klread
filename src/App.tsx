@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useSyncExternalStore, lazy, Suspense } from 'react'
 import { StickyNote, Search, LogOut } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Toaster } from '@/components/ui/sonner'
 import { BrokenCrown } from './components/BrokenCrown'
 import { LoginCard } from './components/LoginCard'
 
@@ -25,6 +27,7 @@ const getScroll = () => Math.round(document.documentElement.scrollTop / (documen
 export default function App() {
   if (new URLSearchParams(location.search).has('logout')) { localStorage.removeItem(KEY); location.replace('/') }
 
+  const [pathname, setPathname] = useState(location.pathname)
   const [learData, setLearData] = useState<any>(null)
   const [session, setSession] = useState<Session | null>(stored)
   const [actNum, setActNum] = useState(1)
@@ -72,6 +75,12 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    const h = () => setPathname(location.pathname)
+    window.addEventListener('popstate', h)
+    return () => window.removeEventListener('popstate', h)
+  }, [])
+
+  useEffect(() => {
     const goto = new URLSearchParams(location.search).get('goto')
     if (goto && session) {
       applyBookmark(goto)
@@ -90,7 +99,7 @@ export default function App() {
   }, [])
 
   async function join() {
-    if (!name.trim() || !code.trim()) return setErr('Enter your name and join code')
+    if (!name.trim() || !code.trim()) return toast.error('Enter your name and join code')
     setLoading(true); setErr('')
     const [n, c] = [name.trim(), code.trim()]
     try {
@@ -102,7 +111,7 @@ export default function App() {
           body: JSON.stringify({ studentName: n, joinCode: c, initials: initials.trim().slice(0, 4).toUpperCase() }),
         })
         if (r2.status === 422) { setIsNew(true); return setErr('Please add your initials — this is only needed once.') }
-        if (!r2.ok) return setErr('Could not join. Check your join code.')
+        if (!r2.ok) return toast.error('Could not join. Check your join code.')
         data = await r2.json()
       }
       const s: Session = { studentId: data.studentId, studentName: n, joinCode: c,
@@ -111,21 +120,16 @@ export default function App() {
       localStorage.setItem(LAST_KEY, JSON.stringify({ name: n, code: c }))
       setSession(s)
       if (data.bookmarkLineId) applyBookmark(data.bookmarkLineId)
-    } catch { setErr('Network error') }
+    } catch { toast.error('Network error') }
     finally { setLoading(false) }
   }
 
-  if (location.pathname === '/teacher' || session?.isTeacher) {
-    const urlKey = new URLSearchParams(location.search).get('key') ?? ''
-    const teacherKey = session?.isTeacher ? session.joinCode : urlKey
-    return (
-      <Suspense fallback={null}>
-        <TeacherView teacherKey={teacherKey}
-          teacherStudentId={session?.isTeacher ? session.studentId : undefined}
-          teacherName={session?.isTeacher ? session.studentName : undefined} />
-      </Suspense>
-    )
+  const bailToLogin = (msg: string) => {
+    if (pathname !== '/') { history.replaceState(null, '', '/'); setPathname('/') }
+    toast.error(msg, { id: 'bail' })
   }
+
+  const teacherActive = pathname === '/teacher' || session?.isTeacher
 
   const goTo = (a: number, s: number) => { setActNum(a); setSceneNum(s) }
   const sizes = ['base', 'lg', 'xl'] as const
@@ -148,7 +152,7 @@ export default function App() {
   </>
 
   const shell = (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       {session && learData ? (
         <Suspense fallback={null}>
           <ReadingHeader toolbar={toolbar}
@@ -164,7 +168,7 @@ export default function App() {
           </header>
         </div>
       )}
-      <main className="px-2 py-4 min-[960px]:px-6 pb-20 min-[960px]:pb-4">
+      <main className="grow flex flex-col px-2 py-4 min-[960px]:px-6 pb-20 min-[960px]:pb-4">
         {session && learData
           ? <Suspense fallback={null}>
               <TextReader acts={learData.acts as any} studentId={session.studentId} studentName={session.studentName}
@@ -180,9 +184,14 @@ export default function App() {
     </div>
   )
 
-  if (!session) return shell
-
-  return (
+  const body = teacherActive ? (
+    <Suspense fallback={null}>
+      <TeacherView teacherKey={session?.isTeacher ? session.joinCode : (new URLSearchParams(location.search).get('key') ?? '')}
+        teacherStudentId={session?.isTeacher ? session.studentId : undefined}
+        teacherName={session?.isTeacher ? session.studentName : undefined}
+        onBail={bailToLogin} />
+    </Suspense>
+  ) : !session ? shell : (
     <Suspense fallback={shell}>
       <TooltipProvider>
         {shell}
@@ -192,5 +201,12 @@ export default function App() {
           onNavigate={(a, s, lineId) => { goTo(a, s); setSearchOpen(false); setTimeout(() => { setScrollToLineId(lineId); setHighlightLineId(lineId) }, 150) }} />}
       </TooltipProvider>
     </Suspense>
+  )
+
+  return (
+    <>
+      <Toaster />
+      {body}
+    </>
   )
 }

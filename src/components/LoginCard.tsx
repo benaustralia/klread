@@ -17,7 +17,7 @@ export function LoginCard({ name, setName, code, setCode, initials, setInitials,
 }) {
   const enter = (e: React.KeyboardEvent) => { if (e.key === 'Enter') onJoin() }
   return (
-    <div className="flex items-center justify-center py-16">
+    <div className="flex items-center justify-center grow py-8">
       <Card className="w-full max-w-lg">
         <CardHeader><CardTitle>Mark it, nuncle.</CardTitle></CardHeader>
         <CardContent className="grid gap-6">
